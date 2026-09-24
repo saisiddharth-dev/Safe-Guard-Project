@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Earth at night">
+  <defs>
+    <radialGradient id="ocean" cx="50%" cy="44%" r="64%">
+      <stop offset="0%" stop-color="#195a9e"/>
+      <stop offset="34%" stop-color="#0d3160"/>
+      <stop offset="68%" stop-color="#081d40"/>
+      <stop offset="100%" stop-color="#040d1f"/>
+    </radialGradient>
+    <radialGradient id="lit" cx="36%" cy="28%" r="82%">
+      <stop offset="0%" stop-color="#8fc0ec" stop-opacity=".5"/>
+      <stop offset="52%" stop-color="#2a5ea8" stop-opacity=".12"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rim" cx="50%" cy="50%" r="50%">
+      <stop offset="70%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="89%" stop-color="#2c6fd0" stop-opacity=".22"/>
+      <stop offset="100%" stop-color="#040d1f" stop-opacity=".35"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="15"/></filter>
+    <filter id="soft2" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="30"/></filter>
+    <filter id="cityGlow" x="-220%" y="-220%" width="540%" height="540%"><feGaussianBlur stdDeviation="3.2"/></filter>
+    <clipPath id="clip"><circle cx="512" cy="512" r="500"/></clipPath>
+  </defs>
+
+  <circle cx="512" cy="512" r="500" fill="url(#ocean)"/>
+
+  <g clip-path="url(#clip)">
+    <g filter="url(#soft)" fill="#192c4c">
+      <ellipse cx="300" cy="300" rx="150" ry="120"/>
+      <ellipse cx="350" cy="190" rx="70" ry="55"/>
+      <ellipse cx="235" cy="385" rx="70" ry="75"/>
+      <ellipse cx="420" cy="235" rx="55" ry="40"/>
+      <ellipse cx="452" cy="150" rx="42" ry="26"/>
+      <ellipse cx="470" cy="176" rx="30" ry="22"/>
+      <ellipse cx="420" cy="650" rx="45" ry="140"/>
+      <ellipse cx="380" cy="600" rx="35" ry="60"/>
+      <ellipse cx="456" cy="702" rx="38" ry="55"/>
+      <ellipse cx="520" cy="250" rx="50" ry="30"/>
+      <ellipse cx="546" cy="272" rx="38" ry="22"/>
+      <ellipse cx="510" cy="430" rx="75" ry="120"/>
+      <ellipse cx="560" cy="360" rx="55" ry="55"/>
+      <ellipse cx="540" cy="512" rx="45" ry="55"/>
+      <ellipse cx="602" cy="402" rx="40" ry="30"/>
+      <ellipse cx="720" cy="292" rx="150" ry="110"/>
+      <ellipse cx="620" cy="245" rx="85" ry="60"/>
+      <ellipse cx="812" cy="402" rx="80" ry="80"/>
+      <ellipse cx="692" cy="442" rx="60" ry="45"/>
+      <ellipse cx="900" cy="320" rx="45" ry="55"/>
+      <ellipse cx="850" cy="482" rx="50" ry="40"/>
+      <ellipse cx="790" cy="690" rx="80" ry="48"/>
+      <ellipse cx="845" cy="665" rx="38" ry="30"/>
+      <ellipse cx="510" cy="600" rx="28" ry="18"/>
+      <ellipse cx="762" cy="520" rx="22" ry="20"/>
+    </g>
+
+    <g filter="url(#cityGlow)" fill="#cfe6ff">
+      <circle cx="330" cy="300" r="4"/><circle cx="360" cy="215" r="3.5"/><circle cx="250" cy="390" r="3.5"/>
+      <circle cx="420" cy="645" r="3.5"/><circle cx="392" cy="600" r="3"/><circle cx="440" cy="705" r="3"/>
+      <circle cx="525" cy="418" r="3.5"/><circle cx="565" cy="350" r="3"/><circle cx="545" cy="500" r="3"/>
+      <circle cx="715" cy="285" r="4"/><circle cx="655" cy="245" r="3.5"/><circle cx="815" cy="395" r="4"/>
+      <circle cx="890" cy="330" r="3"/><circle cx="845" cy="475" r="3"/><circle cx="800" cy="685" r="3"/>
+      <circle cx="530" cy="245" r="3"/><circle cx="770" cy="535" r="2.5"/><circle cx="520" cy="598" r="2.5"/>
+    </g>
+
+    <g filter="url(#soft2)" fill="#d9ecff" opacity=".22">
+      <ellipse cx="300" cy="245" rx="170" ry="42"/>
+      <ellipse cx="520" cy="330" rx="180" ry="46"/>
+      <ellipse cx="760" cy="250" rx="150" ry="38"/>
+      <ellipse cx="420" cy="560" rx="130" ry="36"/>
+      <ellipse cx="700" cy="520" rx="160" ry="40"/>
+      <ellipse cx="880" cy="600" rx="90" ry="28"/>
+      <ellipse cx="300" cy="180" rx="90" ry="26"/>
+      <ellipse cx="620" cy="150" rx="110" ry="28"/>
+      <ellipse cx="200" cy="520" rx="110" ry="30"/>
+    </g>
+
+    <g clip-path="url(#clip)" opacity=".05" stroke="#cfe9ff" stroke-width="1">
+      <path d="M512,22 v980"/>
+      <path d="M344,34 v956"/>
+      <path d="M680,34 v956"/>
+      <path d="M250,70 v884"/>
+      <path d="M774,70 v884"/>
+      <ellipse cx="512" cy="512" rx="500" ry="330" fill="none"/>
+      <ellipse cx="512" cy="512" rx="500" ry="170" fill="none"/>
+    </g>
+  </g>
+
+  <circle cx="512" cy="512" r="500" fill="url(#lit)"/>
+  <circle cx="512" cy="512" r="500" fill="url(#rim)"/>
+  <circle cx="512" cy="512" r="498" fill="none" stroke="#b9d8ff" stroke-opacity=".14" stroke-width="2.5"/>
+</svg>

@@ -1,0 +1,15 @@
+{
+  "name": "oil-sif-intelligence",
+  "version": "1.0.0",
+  "description": "OIL-SIF Intelligence Platform - Backend",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "seed": "node backend/seed.js",
+    "dev": "node --watch backend/server.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongodb": "^7.6.0"
+  }
+}
