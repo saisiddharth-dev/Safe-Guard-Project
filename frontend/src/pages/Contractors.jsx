@@ -20,9 +20,9 @@ export default function Contractors() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white"><Icon name="hardhat" size={22} /> {t('Contractors')}</h1>
+          <h1 className="flex items-center gap-2 text-xl font-extrabold text-white sm:text-2xl"><Icon name="hardhat" size={20} className="shrink-0" /> <span className="min-w-0 break-words">{t('Contractors')}</span></h1>
           <p className="text-sm text-slate-500">{t('Contractor safety intelligence · benchmarking · precursor density')}</p>
         </div>
         {canAdd && <button className="btn-primary" onClick={() => setAdding(true)}><Plus size={15} /> {t('Add Contractor')}</button>}

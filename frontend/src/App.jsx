@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, NavLink, Navigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Brain, Target, Shield, Map as MapIcon, Factory,
   HardHat, SearchX, ClipboardCheck, ClipboardList, BookOpen,
   BarChart3, MessageSquareText, Bell, Settings2, Menu, LogOut, ChevronDown,
-  AlertTriangle, X, ChevronRight, Lock, Fuel,
+  AlertTriangle, X, ChevronRight, Lock, Fuel, Sun, Moon,
 } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { useI18n } from './i18n';
+import { useTheme } from './ThemeContext';
+import { startSyncEngine } from './queue/offlineQueue';
 import Login from './pages/Login';
 import CommandCenter from './pages/CommandCenter';
 import Reports from './pages/Reports';
@@ -80,19 +82,102 @@ const MODULE_LABEL = {
   capa: 'CAPA', inspections: 'Inspections', knowledge: 'Knowledge Base', admin: 'Administration',
 };
 
+function ProfileMenu({ user, onLogout, onClose }) {
+  const { t } = useI18n();
+  const { theme, isDark, setMode, mode } = useTheme();
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose(); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, [onClose]);
+
+  const themes = [
+    { key: 'light', label: t('Light'), active: theme === 'light' && mode !== 'system' },
+    { key: 'dark', label: t('Dark'), active: theme === 'dark' && mode !== 'system' },
+    { key: 'system', label: t('System'), active: mode === 'system' },
+  ];
+
+  return (
+    <div
+      ref={ref}
+      className="absolute bottom-[calc(100%+8px)] left-3 right-3 z-50 overflow-hidden rounded-xl border border-navy-600 bg-navy-850 shadow-2xl shadow-black/40 fade-up"
+      role="menu"
+    >
+      <div className="flex items-center gap-2.5 border-b border-navy-700 px-3.5 py-2.5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">
+          {(user?.full_name || user?.username || 'U').slice(0, 1).toUpperCase()}
+        </div>
+        <div className="min-w-0">
+          <div className="truncate text-xs font-semibold text-white">{user?.full_name || user?.username}</div>
+          <div className="text-[10px] text-slate-400">{t(ROLE_TAG[user?.role] || user?.role)}</div>
+        </div>
+      </div>
+
+      <div className="px-3.5 pb-1 pt-2.5">
+        <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+          {isDark ? <Moon size={11} className="text-slate-400" /> : <Sun size={11} className="text-slate-400" />}
+          {t('Theme')}
+        </div>
+        <div className="flex gap-1 rounded-lg border border-navy-600 bg-navy-900 p-1">
+          {themes.map((th) => (
+            <button
+              key={th.key}
+              role="menuitemradio"
+              aria-checked={th.active}
+              onClick={() => setMode(th.key)}
+              className={`flex-1 rounded-md px-2 py-1.5 text-[11px] font-semibold transition-colors ${
+                th.active
+                  ? 'bg-brand text-white shadow'
+                  : 'text-slate-400 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              {th.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="my-2 h-px bg-navy-700" />
+
+      <button
+        onClick={onLogout}
+        role="menuitem"
+        className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold text-slate-400 transition-colors hover:bg-white/5 hover:text-red-400"
+      >
+        <LogOut size={14} />
+        {t('Logout')}
+      </button>
+    </div>
+  );
+}
+
 function Shell() {
   const { user, logout } = useAuth();
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const modules = new Set(moduleList(user));
   const groups = NAV
     .map((group) => ({ ...group, items: group.items.filter((it) => modules.has(it.module)) }))
     .filter((group) => group.items.length);
 
+  useEffect(() => { startSyncEngine(); }, []);
+
+  // Lock background scroll while the mobile nav drawer is open so the fixed
+  // sidebar only ever slides over a frozen page. Restored on close/unmount.
+  useEffect(() => {
+    if (!open) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
   return (
     <div className="flex h-full">
       {/* Sidebar */}
-      <aside className={`navy-shell fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-navy-700 bg-navy-900/95 backdrop-blur transition-transform lg:static lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`navy-shell fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-navy-700 bg-navy-900/95 backdrop-blur transition-transform lg:relative lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center gap-3 border-b border-navy-700 px-4 py-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-cyan-500 text-white"><Fuel size={22} /></div>
           <div>
@@ -129,19 +214,23 @@ function Shell() {
           ))}
         </nav>
 
-        <div className="border-t border-navy-700 p-3">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
+        <div className="relative border-t border-navy-700 p-3">
+          <button
+            onClick={() => setProfileOpen((v) => !v)}
+            aria-haspopup="menu"
+            aria-expanded={profileOpen}
+            className="flex w-full items-center gap-2.5 rounded-lg p-1.5 transition-colors hover:bg-white/5"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
               {(user?.full_name || user?.username || 'U').slice(0, 1).toUpperCase()}
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 text-left">
               <div className="truncate text-sm font-semibold text-white">{user?.full_name || user?.username}</div>
               <div className="text-[11px] text-slate-400">{t(ROLE_TAG[user?.role] || user?.role)}</div>
             </div>
-            <button onClick={logout} title={t('Logout')} className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-red-400">
-              <LogOut size={15} />
-            </button>
-          </div>
+            <ChevronDown size={15} className={`shrink-0 text-slate-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {profileOpen && <ProfileMenu user={user} onLogout={logout} onClose={() => setProfileOpen(false)} />}
         </div>
       </aside>
 
@@ -149,22 +238,23 @@ function Shell() {
 
       {/* Main */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="navy-shell sticky top-0 z-20 flex items-center gap-3 border-b border-navy-700 bg-navy-900/90 px-4 py-3 backdrop-blur">
+        <header className="navy-shell sticky top-0 z-20 flex items-center gap-2 border-b border-navy-700 bg-navy-900/90 px-3 py-2.5 backdrop-blur sm:gap-3 sm:px-4 sm:py-3">
           <button className="rounded-lg p-2 text-slate-400 hover:bg-white/10 lg:hidden" onClick={() => setOpen(!open)}>
             {open ? <X size={18} /> : <Menu size={18} />}
           </button>
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="relative flex h-2 w-2 shrink-0">
               <span className="pulse-dot absolute inline-flex h-2 w-2 rounded-full bg-red-500" />
             </span>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('Intelligence Live')}</span>
+            <span className="hidden shrink-0 text-[11px] font-bold uppercase tracking-widest text-slate-400 sm:inline">{t('Intelligence Live')}</span>
           </div>
-          <div className="ml-auto flex items-center gap-3">
+          <span className="min-w-0 truncate text-sm font-extrabold text-white sm:hidden">{t('OIL-SIF Intelligence')}</span>
+          <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
             <AIBanner />
             <span className="chip border border-navy-600 bg-navy-800 text-slate-300">v2.4</span>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6"><OutletInner /></main>
+        <main className="flex-1 overflow-y-auto px-4 py-3 sm:p-4 lg:p-6"><OutletInner /></main>
       </div>
     </div>
   );

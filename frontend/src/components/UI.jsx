@@ -65,7 +65,7 @@ export function Dot({ className = '', ...rest }) {
 }
 
 export function Card({ className = '', children, ...rest }) {
-  return <div className={`card p-4 ${className}`} {...rest}>{children}</div>;
+  return <div className={`card p-3 sm:p-4 ${className}`} {...rest}>{children}</div>;
 }
 
 export function Stat({ label, value, sub, delta, danger, ok, icon, accent, spark }) {
@@ -133,16 +133,16 @@ export function Progress({ value, color = '#2f7cf6', className = '' }) {
 export function Modal({ open, onClose, title, children, wide }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-3 sm:p-4" onClick={onClose}>
       <div
         className={`card max-h-[88vh] w-full ${wide ? 'max-w-4xl' : 'max-w-xl'} overflow-y-auto fade-up`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-ink-700 px-5 pb-3 pt-4">
-          <h3 className="text-base font-bold text-white">{title}</h3>
-          <button className="btn-ghost !px-2 !py-1" onClick={onClose}><X size={15} /></button>
+        <div className="flex items-center justify-between border-b border-ink-700 px-4 pb-3 pt-4 sm:px-5">
+          <h3 className="min-w-0 truncate text-base font-bold text-white">{title}</h3>
+          <button className="btn-ghost shrink-0 !px-2 !py-1" onClick={onClose}><X size={15} /></button>
         </div>
-        <div className="mt-4 px-5 pb-5">{children}</div>
+        <div className="mt-4 px-4 pb-4 sm:px-5 sm:pb-5">{children}</div>
       </div>
     </div>
   );
@@ -150,12 +150,12 @@ export function Modal({ open, onClose, title, children, wide }) {
 
 export function Tabs({ tabs, active, onChange }) {
   return (
-    <div className="flex flex-wrap gap-1 rounded-lg border border-ink-700 bg-ink-900 p-1">
+    <div className="no-scrollbar flex gap-1 overflow-x-auto rounded-lg border border-ink-700 bg-ink-900 p-1 sm:flex-wrap sm:overflow-visible">
       {tabs.map((t) => (
         <button
           key={t.id}
           onClick={() => onChange(t.id)}
-          className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+          className={`shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold transition-colors min-h-[44px] sm:min-h-0 ${
             active === t.id ? 'bg-brand text-white' : 'text-slate-400 hover:text-slate-200'
           }`}
         >

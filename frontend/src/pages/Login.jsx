@@ -18,7 +18,7 @@ const LG_CSS = `
 .eff-login { font-family: Inter, system-ui, sans-serif; }
 .eff-login.login-overlay { position: fixed; inset: 0; z-index: 5000; overflow: hidden; transition: opacity 0.5s ease, visibility 0.5s ease; }
 
-.eff-login .lg-nav { position: relative; z-index: 30; height: 70px; display: flex; align-items: center; padding: 0 28px; background: #ffffff; border-bottom: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 12px 32px rgba(15, 23, 42, 0.07); }
+.eff-login .lg-nav { position: relative; z-index: 30; min-height: 70px; height: auto; display: flex; flex-wrap: wrap; align-items: center; padding: 0 28px; background: #ffffff; border-bottom: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 12px 32px rgba(15, 23, 42, 0.07); }
 .eff-login .lg-nav-left { display: flex; align-items: center; gap: 11px; animation: lgFadeScale 0.5s ease both; }
 .eff-login .lg-nav-logo { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 0; }
 .eff-login .lg-nav-brand { display: flex; flex-direction: column; line-height: 1.15; }
@@ -133,7 +133,7 @@ const LG_CSS = `
 
 @media (max-width: 1200px) { .eff-login .lg-headline { font-size: 110px; } .eff-login .lg-earth-scene { width: 70vw; bottom: -34vh; } }
 @media (max-width: 900px) { .eff-login .lg-side { display: none; } .eff-login .lg-headline { font-size: 96px; } }
-@media (max-width: 600px) { .eff-login .lg-nav { padding: 0 18px; } .eff-login .lg-headline { font-size: 72px; letter-spacing: 4px; } .eff-login .lg-hero { padding: 30px 18px 30vh; } .eff-login .lg-eyebrow { letter-spacing: 3px; } .eff-login .lg-earth-scene { width: 90vw; bottom: -36vh; } .eff-login .lg-card { padding: 30px 22px 24px; } }
+@media (max-width: 600px) { .eff-login .lg-nav { padding: 10px 18px; row-gap: 8px; column-gap: 10px; } .eff-login .lg-hero { height: calc(100vh - 120px); } .eff-login .lg-lang select { min-height: 44px; } .eff-login .lg-login-btn { min-height: 44px; display: inline-flex; align-items: center; } .eff-login .lg-card-close { width: 44px; height: 44px; top: 8px; right: 8px; } .eff-login .login-demo-row { min-height: 44px; } .eff-login .lg-headline { font-size: 72px; letter-spacing: 4px; } .eff-login .lg-hero { padding: 30px 18px 30vh; } .eff-login .lg-eyebrow { letter-spacing: 3px; } .eff-login .lg-earth-scene { width: 90vw; bottom: -36vh; } .eff-login .lg-card { padding: 30px 22px 24px; } }
 @media (max-width: 420px) { .eff-login .lg-headline { font-size: 64px; letter-spacing: 3px; } .eff-login .lg-subtitle { font-size: 13px; } .eff-login .lg-nav-brand span { display: none; } }
 
 @media (prefers-reduced-motion: reduce) {

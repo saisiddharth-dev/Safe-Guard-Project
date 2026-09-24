@@ -61,8 +61,8 @@ function Donut({ data, nameKey = 'name', valueKey = 'value', colors, center, t }
           </PieChart>
         </ResponsiveContainer>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-          <span className="text-[30px] font-extrabold leading-none text-[#0f172a]">{fmt.num(total)}</span>
-          <span className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.6px] text-[#94a3b8]">{center}</span>
+          <span className="text-[30px] font-extrabold leading-none text-[var(--surf-text)]">{fmt.num(total)}</span>
+          <span className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.6px] text-[var(--chart-tick)]">{center}</span>
         </div>
       </div>
       <div className="w-full min-w-0 flex-1 space-y-1.5">
@@ -130,7 +130,7 @@ export default function CommandCenter() {
   const typeColors = Object.fromEntries(typeData.map((d, i) => [d.name, TYPE_PALETTE[i % TYPE_PALETTE.length]]));
   const barrierData = (data.barrier_dist || []).map((b) => ({ barrier: b.barrier, Reports: b.n, SIF: b.sif }));
   const shiftData = (data.shift_dist || []).map((s) => ({ ...s, sif_pct: s.n ? Math.round((s.sif / s.n) * 100) : 0 }));
-  const weekData = (data.weekly_trend || []).map((w) => ({ ...w, week: String(w.week || '').slice(5), density_pct: (w.density * 100).toFixed(1) }));
+  const weekData = (data.weekly_trend || []).map((w) => ({ ...w, week: String(w.week || '').slice(5), fullWeek: String(w.week || ''), density_pct: Math.round((+w.density || 0) * 1000) / 10 }));
   const periodData = (data.period_compare || []).map((p) => ({ period: t(p.period), reports: p.reports, sif: p.sif, critical: p.critical }));
   const topSites = [...(data.heatmap || [])].sort((a, b) => b.density - a.density).slice(0, 5);
 
@@ -146,7 +146,7 @@ export default function CommandCenter() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white"><Icon name="satellite" size={22} /> {t('Command Center')}</h1>
+          <h1 className="flex items-center gap-2 text-xl font-extrabold text-white sm:text-2xl"><Icon name="satellite" size={20} className="shrink-0" /> <span className="min-w-0 break-words">{t('Command Center')}</span></h1>
           <p className="text-sm text-slate-500">{t('Enterprise SIF risk · what requires attention now')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -194,6 +194,43 @@ export default function CommandCenter() {
         ))}
       </div>
 
+      {/* Trend */}
+      <Card>
+        <SectionTitle
+          title={trendView === 'yearly' ? t('SIF Trend — Yearly') : t('SIF Trend — Monthly')}
+          sub={trendView === 'yearly' ? t('Yearly report volume and SIF-potential reports') : t('Monthly report volume and SIF-potential reports')}
+          right={
+            <div className="flex gap-1 rounded-lg border border-ink-700 bg-ink-900 p-1">
+              {[['monthly', t('Monthly')], ['yearly', t('Yearly')]].map(([v, l]) => (
+                <button
+                  key={v}
+                  onClick={() => setTrendView(v)}
+                  className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors min-h-[44px] sm:min-h-0 ${trendView === v ? 'bg-brand text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+          }
+        />
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={(trendView === 'yearly' ? data.yearly_trend || [] : data.trend || []).map((p) => ({ month: trendView === 'yearly' ? p.year : p.month, reports: p.reports, sif: p.sif }))}
+              margin={{ top: 5, right: 10, left: -15, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} strokeOpacity={0.05} />
+              <XAxis dataKey="month" tick={AX_TICK} stroke={AX_STROKE} />
+              <YAxis tick={AX_TICK} stroke={AX_STROKE} />
+              <Tooltip contentStyle={TT_STYLE} />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Line type="monotone" dataKey="reports" name={t('Reports')} stroke="#2f7cf6" strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="sif" name={t('SIF-potential')} stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+
       <div className="grid gap-5 lg:grid-cols-3">
         {/* SIF precursor risk map */}
         <Card className="lg:col-span-2">
@@ -205,7 +242,7 @@ export default function CommandCenter() {
                   className="flex w-full items-center gap-3 bg-ink-900 px-3 py-2.5 text-left"
                   onClick={() => setExpanded(expanded === r.region ? '' : r.region)}
                 >
-                  <span className="flex-1 text-sm font-bold text-white">{r.region}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-bold text-white">{r.region}</span>
                   <span className={`font-mono text-xs ${regionColor(r)}`}>{riskDots(r.density, t)[0]} {t(riskDots(r.density, t)[1])}</span>
                   <span className="text-xs text-slate-500">{t('{sif} SIF / {n} rpt', { sif: fmt.num(r.sif), n: fmt.num(r.reports) })}</span>
                 </button>
@@ -213,7 +250,7 @@ export default function CommandCenter() {
                   <div className="grid gap-2 border-t border-ink-700 p-3 sm:grid-cols-2">
                     {r.sites.map((s) => (
                       <div key={s.site} className="flex items-center gap-2 text-xs">
-                        <span className="w-24 truncate font-semibold text-slate-300">{s.site}</span>
+                        <span className="min-w-0 max-w-[10rem] truncate font-semibold text-slate-300">{s.site}</span>
                         <Progress value={s.density * 100} color={s.density > 0.5 ? '#ef4444' : s.density > 0.2 ? '#f59e0b' : '#10b981'} className="flex-1" />
                         <span className="mono text-slate-500">{s.density.toFixed(2)}</span>
                       </div>
@@ -252,43 +289,6 @@ export default function CommandCenter() {
         </Card>
       </div>
 
-      {/* Trend */}
-      <Card>
-        <SectionTitle
-          title={trendView === 'yearly' ? t('SIF Trend — Yearly') : t('SIF Trend — Monthly')}
-          sub={trendView === 'yearly' ? t('Yearly report volume and SIF-potential reports') : t('Monthly report volume and SIF-potential reports')}
-          right={
-            <div className="flex gap-1 rounded-lg border border-ink-700 bg-ink-900 p-1">
-              {[['monthly', t('Monthly')], ['yearly', t('Yearly')]].map(([v, l]) => (
-                <button
-                  key={v}
-                  onClick={() => setTrendView(v)}
-                  className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${trendView === v ? 'bg-brand text-white' : 'text-slate-400 hover:text-slate-200'}`}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
-          }
-        />
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={(trendView === 'yearly' ? data.yearly_trend || [] : data.trend || []).map((p) => ({ month: trendView === 'yearly' ? p.year : p.month, reports: p.reports, sif: p.sif }))}
-              margin={{ top: 5, right: 10, left: -15, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} strokeOpacity={0.05} />
-              <XAxis dataKey="month" tick={AX_TICK} stroke={AX_STROKE} />
-              <YAxis tick={AX_TICK} stroke={AX_STROKE} />
-              <Tooltip contentStyle={TT_STYLE} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Line type="monotone" dataKey="reports" name={t('Reports')} stroke="#2f7cf6" strokeWidth={2} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="sif" name={t('SIF-potential')} stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
-
       {/* Analysis — distributions */}
       <div className="grid gap-5 lg:grid-cols-3">
         <Card>
@@ -309,7 +309,7 @@ export default function CommandCenter() {
             {topSites.map((s) => (
               <div key={s.site}>
                 <div className="mb-1 flex items-center justify-between text-xs">
-                  <span className="w-28 truncate font-semibold text-slate-300">{s.site}</span>
+                  <span className="min-w-0 max-w-[12rem] truncate font-semibold text-slate-300">{s.site}</span>
                   <span className="text-slate-500">{fmt.num(s.reports)} rpt</span>
                   <span className="font-mono font-bold" style={{ color: s.density > 0.5 ? '#f87171' : s.density > 0.2 ? '#f59e0b' : '#34d399' }}>{s.density.toFixed(2)}</span>
                 </div>
@@ -325,23 +325,56 @@ export default function CommandCenter() {
       <div className="grid gap-5 lg:grid-cols-2">
         <Card>
           <SectionTitle title={t('SIF density — 12 weeks')} sub={t('Weekly report volume vs SIF-potential density')} />
-          <div className="h-60">
+          <div className="h-60 sm:h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={weekData} margin={{ top: 5, right: -6, left: -15, bottom: 0 }}>
+              <ComposedChart data={weekData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="wkFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#2f7cf6" stopOpacity={0.35} />
                     <stop offset="100%" stopColor="#2f7cf6" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} strokeOpacity={0.05} />
-                <XAxis dataKey="week" tick={AX_TICK} stroke={AX_STROKE} />
-                <YAxis yAxisId="l" tick={AX_TICK} stroke={AX_STROKE} />
-                <YAxis yAxisId="r" orientation="right" tick={AX_TICK} stroke={AX_STROKE} />
-                <Tooltip contentStyle={TT_STYLE} />
+                <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} strokeOpacity={0.05} vertical={false} />
+                <XAxis
+                  dataKey="week"
+                  tick={AX_TICK}
+                  stroke={AX_STROKE}
+                  tickMargin={6}
+                  minTickGap={24}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  yAxisId="l"
+                  tick={AX_TICK}
+                  stroke={AX_STROKE}
+                  width={38}
+                  tickMargin={6}
+                  axisLine={false}
+                  tickLine={false}
+                  domain={[0, (dataMax) => (dataMax <= 0 ? 10 : Math.ceil(dataMax / 10) * 10)]}
+                />
+                <YAxis
+                  yAxisId="r"
+                  orientation="right"
+                  tick={AX_TICK}
+                  stroke={AX_STROKE}
+                  width={40}
+                  tickMargin={6}
+                  axisLine={false}
+                  tickLine={false}
+                  domain={[0, 100]}
+                  tickCount={5}
+                  tickFormatter={(v) => `${v}%`}
+                />
+                <Tooltip
+                  contentStyle={TT_STYLE}
+                  labelFormatter={(_, payload) => payload?.[0]?.payload?.fullWeek || ''}
+                  formatter={(value, name) => [typeof value === 'number' ? (name.includes('density') || name.includes('%') ? `${value}%` : value.toLocaleString('en-US')) : value, name]}
+                />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Area yAxisId="l" type="monotone" dataKey="reports" name={t('Reports')} stroke="#2f7cf6" fill="url(#wkFill)" strokeWidth={2} />
-                <Line yAxisId="r" type="monotone" dataKey="density_pct" name={t('SIF density')} stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+                <Area yAxisId="l" type="linear" dataKey="reports" name={t('Reports')} stroke="#2f7cf6" fill="url(#wkFill)" strokeWidth={2} />
+                <Line yAxisId="r" type="linear" dataKey="density_pct" name={t('SIF density')} stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -436,20 +469,22 @@ export default function CommandCenter() {
       <div className="grid gap-5 lg:grid-cols-2">
         <Card>
           <SectionTitle title={t('Top Activities')} sub={t('By SIF-precursor density')} right={<Link to="/precursors" className="flex items-center gap-1 text-xs font-bold text-brand">{t('View all')}<Icon name="arrow" size={13} /></Link>} />
-          <table className="w-full">
-            <thead><tr><th className="th">#</th><th className="th">{t('Activity')}</th><th className="th">{t('Reports')}</th><th className="th">{t('SIF %')}</th><th className="th">{t('Density')}</th></tr></thead>
-            <tbody>
-              {insightized(data.top_activities).map((a, i) => (
-                <tr key={a.activity} className="border-t border-ink-700/60">
-                  <td className="td text-slate-500">{i + 1}</td>
-                  <td className="td font-semibold text-white">{a.activity}</td>
-                  <td className="td">{fmt.num(a.n)}</td>
-                  <td className="td">{Math.round((a.sif / (a.n || 1)) * 100)}%</td>
-                  <td className="td"><span className="font-mono font-bold" style={{ color: a.density > 0.5 ? '#f87171' : a.density > 0.2 ? '#f59e0b' : '#34d399' }}>{a.density.toFixed(2)}</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[480px]">
+              <thead><tr><th className="th">#</th><th className="th">{t('Activity')}</th><th className="th">{t('Reports')}</th><th className="th">{t('SIF %')}</th><th className="th">{t('Density')}</th></tr></thead>
+              <tbody>
+                {insightized(data.top_activities).map((a, i) => (
+                  <tr key={a.activity} className="border-t border-ink-700/60">
+                    <td className="td text-slate-500">{i + 1}</td>
+                    <td className="td font-semibold text-white">{a.activity}</td>
+                    <td className="td">{fmt.num(a.n)}</td>
+                    <td className="td">{Math.round((a.sif / (a.n || 1)) * 100)}%</td>
+                    <td className="td"><span className="font-mono font-bold" style={{ color: a.density > 0.5 ? '#f87171' : a.density > 0.2 ? '#f59e0b' : '#34d399' }}>{a.density.toFixed(2)}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Card>
 
         <Card>

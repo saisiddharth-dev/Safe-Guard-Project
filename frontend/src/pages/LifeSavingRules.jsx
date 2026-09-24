@@ -26,7 +26,7 @@ export default function LifeSavingRules() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white"><Icon name="shield" size={22} /> {t('Life-Saving Rules')}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-extrabold text-white sm:text-2xl"><Icon name="shield" size={20} className="shrink-0" /> <span className="min-w-0 break-words">{t('Life-Saving Rules')}</span></h1>
         <p className="text-sm text-slate-500">{t('IOGP Life-Saving Rules mapped automatically to every safety report')}</p>
       </div>
 
@@ -119,24 +119,26 @@ function Violations({ data, setViewing }) {
   return (
     <Card>
       <SectionTitle title={t('LSR violations & exposure')} sub={t('Click any rule to see its expected controls and report evidence')} />
-      <table className="w-full">
-        <thead><tr><th className="th">{t('Rule')}</th><th className="th">{t('Observations')}</th><th className="th">{t('SIF-potential')} *</th><th className="th">{t('Share')}</th><th className="th"></th></tr></thead>
-        <tbody>
-          {rows.map((r) => {
-            const meta = LSR_META[r.rule] || {};
-            const share = rows.reduce((s, x) => s + x.count, 0) ? Math.round((r.count / rows.reduce((s, x) => s + x.count, 0)) * 100) : 0;
-            return (
-              <tr key={r.rule} className="border-t border-ink-700/60">
-                <td className="td font-semibold text-white"><span className="flex items-center gap-1.5"><Icon name={meta.icon} size={14} /> {t(r.rule)}</span></td>
-                <td className="td">{fmt.num(r.count)}</td>
-                <td className="td text-red-400">{fmt.num(r.sif)}</td>
-                <td className="td"><Progress value={share} color={meta.color} className="w-24" /> <span className="mono ml-2 text-slate-500">{share}%</span></td>
-                <td className="td"><button className="btn-ghost !px-2 !py-1" onClick={() => setViewing(r.rule)}><Eye size={13} /> {t('Why this rule')}</button></td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[620px]">
+          <thead><tr><th className="th">{t('Rule')}</th><th className="th">{t('Observations')}</th><th className="th">{t('SIF-potential')} *</th><th className="th">{t('Share')}</th><th className="th"></th></tr></thead>
+          <tbody>
+            {rows.map((r) => {
+              const meta = LSR_META[r.rule] || {};
+              const share = rows.reduce((s, x) => s + x.count, 0) ? Math.round((r.count / rows.reduce((s, x) => s + x.count, 0)) * 100) : 0;
+              return (
+                <tr key={r.rule} className="border-t border-ink-700/60">
+                  <td className="td font-semibold text-white"><span className="flex items-center gap-1.5"><Icon name={meta.icon} size={14} /> {t(r.rule)}</span></td>
+                  <td className="td">{fmt.num(r.count)}</td>
+                  <td className="td text-red-400">{fmt.num(r.sif)}</td>
+                  <td className="td"><Progress value={share} color={meta.color} className="w-24" /> <span className="mono ml-2 text-slate-500">{share}%</span></td>
+                  <td className="td"><button className="btn-ghost !px-2 !py-1" onClick={() => setViewing(r.rule)}><Eye size={13} /> {t('Why this rule')}</button></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
       <p className="mt-2 text-[11px] text-slate-600">* {t('SIF-potential denotes reports the AI judged to involve potential serious or fatal injury.')}</p>
     </Card>
   );

@@ -18,7 +18,7 @@ export default function AIIntelligence() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white"><Icon name="bot" size={22} /> {t('AI Intelligence')}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-extrabold text-white sm:text-2xl"><Icon name="bot" size={20} className="shrink-0" /> <span className="min-w-0 break-words">{t('AI Intelligence')}</span></h1>
         <p className="text-sm text-slate-500">{t('Classification · Extraction · Explainability · Similarity · Model health')}</p>
       </div>
 
@@ -55,7 +55,7 @@ function ClassifyTab() {
         <SectionTitle title={t('SIF Classification Playground')} sub={t('Explainable AI — every prediction includes confidence + evidence')} />
         <textarea className="input min-h-[140px] resize-y" value={text} onChange={(e) => setText(e.target.value)}
           placeholder={t('Describe an observation…')} />
-        <div className="mt-2 flex gap-2">
+        <div className="mt-2 flex flex-wrap gap-2">
           <button className="btn-primary" onClick={run} disabled={busy || !text.trim()}>
             {busy ? t('Classifying…') : (<><Sparkles size={15} /> {t('Classify')}</>)}
           </button>
@@ -120,9 +120,9 @@ function ExtractTab() {
 
 function Grid({ label, value }) {
   return (
-    <div className="flex items-start justify-between gap-3 border-b border-ink-700/60 py-2 last:border-0">
-      <div className="text-[11px] font-bold uppercase text-slate-500">{label}</div>
-      <div className="text-right text-sm text-slate-200">{value || '—'}</div>
+    <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-0.5 border-b border-ink-700/60 py-2 last:border-0">
+      <div className="min-w-0 text-[11px] font-bold uppercase text-slate-500">{label}</div>
+      <div className="ml-auto min-w-0 break-words text-right text-sm text-slate-200">{value || '—'}</div>
     </div>
   );
 }
@@ -160,14 +160,14 @@ function SimilarTab() {
           <div className="space-y-2">
             {results.map((s) => (
               <div key={s.id} className="rounded-lg border border-ink-700 bg-ink-900 p-3">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span className="mono text-slate-500">{s.id}</span>
-                  <Progress value={s.score * 100} className="w-20" />
+                  <Progress value={s.score * 100} className="w-20 shrink-0" />
                   <span className="text-xs font-bold text-white">{Math.round(s.score * 100)}%</span>
                   {s.site && <span className="chip flex items-center gap-1 bg-slate-500/10 text-slate-400"><Icon name="pin" size={12} /> {s.site}</span>}
                   <span className="ml-auto text-[11px] text-slate-600">{s.date}</span>
                 </div>
-                <div className="mt-1.5 text-xs text-slate-300">{s.text}</div>
+                <div className="mt-1.5 break-words text-xs text-slate-300">{s.text}</div>
               </div>
             ))}
             {!results.length && <Empty message={t('No results.')} />}
@@ -204,11 +204,11 @@ function ModelTab({ metrics }) {
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg border border-ink-700 bg-ink-900 p-4 text-center">
             <div className="text-3xl font-extrabold text-white">{fmt.num(m?.feedback_count || 0)}</div>
-            <div className="mt-1 text-[11px] font-bold uppercase text-slate-500">{t('Human corrections recorded')}</div>
+            <div className="mt-1 break-words text-[11px] font-bold uppercase text-slate-500">{t('Human corrections recorded')}</div>
           </div>
           <div className="rounded-lg border border-ink-700 bg-ink-900 p-4 text-center">
             <div className="flex items-center justify-center text-3xl font-extrabold text-emerald-400"><Icon name="check" size={26} /></div>
-            <div className="mt-1 text-[11px] font-bold uppercase text-slate-500">{t('Explainability enabled')}</div>
+            <div className="mt-1 break-words text-[11px] font-bold uppercase text-slate-500">{t('Explainability enabled')}</div>
           </div>
         </div>
         <div className="mt-3 rounded-lg border border-ink-700 bg-ink-900 p-3">

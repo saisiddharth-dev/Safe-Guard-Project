@@ -28,7 +28,9 @@ async function request(path, options = {}) {
   if (!resp.ok) {
     let detail = resp.statusText;
     try { const j = await resp.json(); detail = j.error || j.detail || detail; } catch { /* noop */ }
-    throw new Error(detail);
+    const err = new Error(detail);
+    err.status = resp.status;
+    throw err;
   }
   return resp.json();
 }

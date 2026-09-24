@@ -19,7 +19,7 @@ export default function Investigations() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white"><Icon name="warn" size={22} /> {t('Investigations & RCA')}</h1>
+          <h1 className="flex items-center gap-2 text-xl font-extrabold text-white sm:text-2xl"><Icon name="warn" size={20} className="shrink-0" /> <span className="min-w-0 break-words">{t('Investigations & RCA')}</span></h1>
           <p className="text-sm text-slate-500">{t('AI-assisted root-cause analysis — HSE investigator validation required')}</p>
         </div>
         <button className="btn-primary" onClick={() => setNewInv(true)}><Plus size={15} /> {t('New Investigation')}</button>
@@ -28,12 +28,12 @@ export default function Investigations() {
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {rows.map((i) => (
           <Card key={i.id} className="cursor-pointer transition-colors hover:border-brand" onClick={() => setView(i)}>
-            <div className="flex items-center justify-between">
+<div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-sm font-bold text-white">{i.title}</span>
               <StatusBadge status={i.status} />
             </div>
             <p className="mt-2 line-clamp-2 text-xs text-slate-400">{i.summary || i.text_original}</p>
-            <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
               <span className="font-mono">{i.report_no}</span>
               <span>{fmt.ago(i.created_at)}</span>
               {i.investigator && <span className="flex items-center gap-1"><Icon name="target" size={12} /> {i.investigator}</span>}
@@ -104,7 +104,7 @@ function InvestigationDetail({ inv, onClose, onUpdate }) {
         )}
 
         <div className="rounded-xl border border-ink-700 p-3">
-          <div className="flex items-center justify-between">
+<div className="flex flex-wrap items-center justify-between gap-2">
             <div className="label !mb-0">{t('AI-assisted RCA')}</div>
             <button className="btn-ghost !px-2 !py-1 text-[11px]" onClick={runAI} disabled={busy}><Sparkles size={12} /> {busy ? t('Generating…') : t('Generate suggestion')}</button>
           </div>

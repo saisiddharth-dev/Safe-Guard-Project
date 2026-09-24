@@ -24,9 +24,9 @@ export default function Knowledge() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white"><Icon name="book" size={22} /> {t('Enterprise Knowledge Base')}</h1>
+          <h1 className="flex items-center gap-2 text-xl font-extrabold text-white sm:text-2xl"><Icon name="book" size={20} className="shrink-0" /> <span className="min-w-0 break-words">{t('Enterprise Knowledge Base')}</span></h1>
           <p className="text-sm text-slate-500">{t('IOGP rules, OIL SOPs, JSA references, incident reports, lessons learned')}</p>
         </div>
         {canUpload && <button className="btn-primary" onClick={() => setUpload(true)}><Plus size={15} /> {t('Add document')}</button>}
@@ -37,7 +37,7 @@ export default function Knowledge() {
           <Search size={14} className="absolute left-3 top-2.5 text-slate-500" />
           <input className="input !pl-9" placeholder={t('Search knowledge base…')} value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
-        {CATS.map((c) => <button key={c} onClick={() => setCat(c)} className={`rounded-full px-3 py-1 text-[11px] font-semibold ${cat === c ? 'bg-brand text-white' : 'bg-ink-800 text-slate-400'} `}>{t(c)}</button>)}
+        {CATS.map((c) => <button key={c} onClick={() => setCat(c)} className={`tap rounded-full px-4 py-1 text-[11px] font-semibold sm:px-3 ${cat === c ? 'bg-brand text-white' : 'bg-ink-800 text-slate-400'} `}>{t(c)}</button>)}
       </div>
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">

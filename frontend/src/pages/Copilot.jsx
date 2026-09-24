@@ -45,7 +45,7 @@ export default function Copilot() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white"><Icon name="bot" size={22} /> {t('Safety Copilot')}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-extrabold text-white sm:text-2xl"><Icon name="bot" size={20} className="shrink-0" /> <span className="min-w-0 break-words">{t('Safety Copilot')}</span></h1>
         <p className="text-sm text-slate-500">{t('Ask-the-dashboard AI · natural-language analytics')}</p>
       </div>
 
@@ -63,7 +63,7 @@ export default function Copilot() {
         <div className="mt-3 border-t border-ink-700 pt-3">
           <div className="mb-2 flex flex-wrap gap-1.5">
             {SUGGESTIONS.map((s) => (
-              <button key={s.q} onClick={() => ask(s.q)} className="rounded-full border border-ink-600 bg-ink-800 px-2.5 py-1 text-[11px] text-slate-400 hover:border-brand hover:text-white">
+              <button key={s.q} onClick={() => ask(s.q)} className="tap rounded-full border border-ink-600 bg-ink-800 px-4 py-1 text-[11px] text-left text-slate-400 hover:border-brand hover:text-white sm:px-2.5 sm:text-center">
                 {t(s.q)}
               </button>
             ))}
@@ -109,7 +109,7 @@ function Message({ m, onAction }) {
   if (m.role === 'user') {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-brand px-4 py-2.5 text-sm text-white">{m.text}</div>
+        <div className="max-w-[85%] min-w-0 break-words rounded-2xl rounded-br-sm bg-brand px-4 py-2.5 text-sm text-white">{m.text}</div>
       </div>
     );
   }
@@ -120,8 +120,8 @@ function Message({ m, onAction }) {
           const actions = { 'View reports': '/reports?view=all', 'View sites': '/sites', 'View contractors': '/contractors', 'Create intervention': '/capa', 'View CAPA': '/capa', 'View alerts': '/alerts', 'View precursors': '/precursors', 'View analytics': '/analytics', 'View activities ranking': '/precursors', 'View barrier intelligence': '/precursors', 'View geographic risk map': '/riskmap', 'Command Center': '/', 'View intervention effectiveness': '/precursors' };
           const to = actions[b];
           return to
-            ? <a key={b} href={to} className="flex items-center gap-1 rounded-full border border-brand/40 bg-brand/10 px-3 py-1 text-[11px] font-semibold text-brand hover:bg-brand/20">{t(b)}<Icon name="arrow" size={13} /></a>
-            : <button key={b} onClick={() => onAction(b)} className="rounded-full border border-ink-600 bg-ink-800 px-3 py-1 text-[11px] font-semibold text-slate-300">{t(b)}</button>;
+            ? <a key={b} href={to} className="tap items-center gap-1 rounded-full border border-brand/40 bg-brand/10 px-4 py-1 text-[11px] font-semibold text-left text-brand hover:bg-brand/20 sm:px-3 sm:text-center">{t(b)}<Icon name="arrow" size={13} /></a>
+            : <button key={b} onClick={() => onAction(b)} className="tap rounded-full border border-ink-600 bg-ink-800 px-4 py-1 text-[11px] font-semibold text-left text-slate-300 sm:px-3 sm:text-center">{t(b)}</button>;
         })}
       </div>
     );
@@ -129,7 +129,7 @@ function Message({ m, onAction }) {
   return (
     <div className="flex items-start gap-2">
       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand to-cyan-500"><MessageCircle size={14} className="text-white" /></div>
-      <div className="max-w-[85%] rounded-2xl rounded-bl-sm border border-ink-700 bg-ink-800 px-4 py-2.5 text-sm text-slate-200"><Format text={m.text} /></div>
+      <div className="max-w-[85%] min-w-0 break-words rounded-2xl rounded-bl-sm border border-ink-700 bg-ink-800 px-4 py-2.5 text-sm text-slate-200"><Format text={m.text} /></div>
     </div>
   );
 }

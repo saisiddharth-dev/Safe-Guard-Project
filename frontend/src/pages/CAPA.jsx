@@ -43,7 +43,7 @@ export default function CAPA() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white"><Icon name="check" size={22} /> {t('CAPA — Corrective & Preventive Action')}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-extrabold text-white sm:text-2xl"><Icon name="check" size={20} className="shrink-0" /> <span className="min-w-0 break-words">{t('CAPA — Corrective & Preventive Action')}</span></h1>
         <p className="text-sm text-slate-500">{t('Every significant observation supports assign → act → verify → close')}</p>
       </div>
 
@@ -132,7 +132,7 @@ function ActionModal({ a, onClose, setStatus, assignee, setAssignee }) {
           <div className="rounded-lg border border-ink-700 bg-ink-900 p-3">
             <div className="label">{t('Assign to (user id or blank)')}</div>
             <input className="input" value={assignee} onChange={(e) => setAssignee(e.target.value)} placeholder={t('e.g. 4')} />
-            <div className="mt-2 flex gap-2">
+            <div className="mt-2 flex flex-wrap gap-2">
               {['Assigned', 'In Progress', 'Pending Verification', 'Closed'].map((s) => (
                 <button key={s} className="btn-ghost !px-2 !py-1 text-[11px]" onClick={() => { setStatus(a, s); onClose(); }}>{t('Mark')} {t(s)}</button>
               ))}

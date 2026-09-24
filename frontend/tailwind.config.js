@@ -5,12 +5,12 @@ export default {
     extend: {
       colors: {
         ink: {
-          950: '#eef2f8',
-          900: '#ffffff',
-          850: '#ffffff',
-          800: '#f4f7fb',
-          700: '#e3e9f2',
-          600: '#d6dfea',
+          950: 'rgb(var(--ink-950) / <alpha-value>)',
+          900: 'rgb(var(--ink-900) / <alpha-value>)',
+          850: 'rgb(var(--ink-850) / <alpha-value>)',
+          800: 'rgb(var(--ink-800) / <alpha-value>)',
+          700: 'rgb(var(--ink-700) / <alpha-value>)',
+          600: 'rgb(var(--ink-600) / <alpha-value>)',
         },
         navy: {
           950: '#070b14',
