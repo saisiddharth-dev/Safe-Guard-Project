@@ -13,7 +13,7 @@ export default function Inspections() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white"><Icon name="clipboard" size={22} /> {t('Inspections')}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-extrabold text-white sm:text-2xl"><Icon name="clipboard" size={20} className="shrink-0" /> <span className="min-w-0 break-words">{t('Inspections')}</span></h1>
         <p className="text-sm text-slate-500">{t('Digital inspection checklists · AI-classified findings · CAPA link')}</p>
       </div>
 

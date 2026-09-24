@@ -47,13 +47,13 @@ export default function Admin() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white"><Icon name="settings" size={22} /> {t('Administration')}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-extrabold text-white sm:text-2xl"><Icon name="settings" size={20} className="shrink-0" /> <span className="min-w-0 break-words">{t('Administration')}</span></h1>
         <p className="text-sm text-slate-500">{t('Access Control · data quality · audit trail · model governance · users')}</p>
       </div>
 
       <div className="flex gap-1 rounded-lg border border-ink-700 bg-ink-900 p-1 w-fit overflow-x-auto">
         {[['access', t('Access Control')], ['users', t('Users & Roles')], ['data', t('Data Quality')], ['audit', t('Audit Trail')], ['models', t('AI Models')]].map(([id, l]) => (
-          <button key={id} onClick={() => setTab(id)} className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold ${tab === id ? 'bg-brand text-white' : 'text-slate-400'}`}>{l}</button>
+          <button key={id} onClick={() => setTab(id)} className={`min-h-[44px] whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold sm:min-h-0 ${tab === id ? 'bg-brand text-white' : 'text-slate-400'}`}>{l}</button>
         ))}
       </div>
 
@@ -200,14 +200,14 @@ function AccessControl({ data }) {
                     <button
                       disabled={savingId === u.id || !changes.length}
                       onClick={() => saveChanges(u)}
-                      className="flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-brand/90 disabled:opacity-50"
+                      className="tap items-center gap-1.5 rounded-lg bg-brand px-3.5 py-1.5 text-[11px] font-semibold text-white hover:bg-brand/90 disabled:opacity-50"
                     >
                       <Check size={12} /> {changes.length ? t('Save Changes ({n})', { n: changes.length }) : t('Save Changes')}
                     </button>
                     <button
                       disabled={savingId === u.id || u.role === 'Administrator'}
                       onClick={() => resetAll(u)}
-                      className="flex items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-800 px-3 py-1.5 text-[11px] font-semibold text-slate-300 hover:bg-ink-700 disabled:opacity-50"
+                      className="tap items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-800 px-3.5 py-1.5 text-[11px] font-semibold text-slate-300 hover:bg-ink-700 disabled:opacity-50"
                     >
                       <RotateCcw size={12} /> {t('Reset to Role Default')}
                     </button>

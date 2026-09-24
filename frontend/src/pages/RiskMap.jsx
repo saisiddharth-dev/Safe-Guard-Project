@@ -36,7 +36,7 @@ export default function RiskMap() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white"><Icon name="map" size={22} /> {t('Risk Map')}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-extrabold text-white sm:text-2xl"><Icon name="map" size={20} className="shrink-0" /> <span className="min-w-0 break-words">{t('Risk Map')}</span></h1>
         <p className="text-sm text-slate-500">{t('India → State → Field → Site heatmark and risk matrix')}</p>
       </div>
 
@@ -110,7 +110,7 @@ export default function RiskMap() {
               </tbody>
             </table>
           </div>
-          <div className="mt-3 flex items-center gap-4 text-[11px] text-slate-400">
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-slate-400">
             <span className="flex items-center gap-1.5"><Dot className="bg-amber-400/60" /> {t('Low')}</span><span className="flex items-center gap-1.5"><Dot className="bg-orange-500/70" /> {t('Medium')}</span><span className="flex items-center gap-1.5"><Dot className="bg-red-500/80" /> {t('High')}</span>
             <span className="ml-auto">{t('Cell color scaled by report count per rule per site')}</span>
           </div>

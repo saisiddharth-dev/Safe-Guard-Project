@@ -12,6 +12,15 @@ async function ensureConnected() {
   if (connected) return;
   await client.connect();
   connected = true;
+  // Enforce idempotency at the storage layer for offline-queue re-syncs.
+  // Sparse: only documents that carry client_report_id are indexed, so older
+  // rows created before this field existed (or without one) never collide.
+  try {
+    await mdb.collection('reports').createIndex(
+      { client_report_id: 1 },
+      { unique: true, sparse: true, name: 'uniq_client_report_id' }
+    );
+  } catch (e) { /* index may already exist with the same shape */ }
 }
 
 async function nextId(name) {

@@ -29,7 +29,7 @@ export default function SIFPrecursors() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white"><Icon name="target" size={22} /> {t('SIF Precursors')}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-extrabold text-white sm:text-2xl"><Icon name="target" size={20} className="shrink-0" /> <span className="min-w-0 break-words">{t('SIF Precursors')}</span></h1>
         <p className="text-sm text-slate-500">{t('Pattern discovery · precursor density · barrier intelligence')}</p>
       </div>
 
@@ -65,14 +65,14 @@ function PatternsTab({ data, ai }) {
     <div className="grid gap-4 sm:grid-cols-2 items-start">
       {patterns.map((p) => (
         <Card key={p.id} className="fade-up">
-          <div className="flex items-start justify-between gap-2">
-            <div>
+          <div className="flex min-w-0 items-start justify-between gap-2">
+            <div className="min-w-0">
               <div className="flex items-center gap-2 text-sm font-bold text-white">
-                <Target size={15} className="text-brand" /> {p.title}
+                <Target size={15} className="shrink-0 text-brand" /> <span className="min-w-0 break-words">{p.title}</span>
               </div>
               <div className="mt-0.5 text-[11px] text-slate-500">{p.category}</div>
             </div>
-            <span className={`chip ${p.trend === 'EMERGING' ? 'bg-red-500/15 text-red-400' : p.trend === 'RECURRING' ? 'bg-amber-500/15 text-amber-400' : 'bg-sky-500/15 text-sky-400'}`}>{t(p.trend)}</span>
+            <span className={`chip shrink-0 ${p.trend === 'EMERGING' ? 'bg-red-500/15 text-red-400' : p.trend === 'RECURRING' ? 'bg-amber-500/15 text-amber-400' : 'bg-sky-500/15 text-sky-400'}`}>{t(p.trend)}</span>
           </div>
           <p className="mt-2 text-sm text-slate-300">{p.description}</p>
           <div className="mt-3 grid grid-cols-3 gap-2 text-center">
@@ -88,9 +88,9 @@ function PatternsTab({ data, ai }) {
           <SectionTitle title={t('AI precursor intelligence')} sub={t('Computed live from report texts')} />
           {ai.patterns.map((p, i) => (
             <div key={i} className="mb-2 rounded-lg border border-ink-700 bg-ink-900 p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-white">{p.activity} → {p.barrier}</span>
-                <span className="chip border border-ink-600 bg-ink-800 text-slate-400">n={p.count}</span>
+              <div className="flex items-center justify-between gap-2">
+                <span className="min-w-0 break-words text-sm font-semibold text-white">{p.activity} → {p.barrier}</span>
+                <span className="chip shrink-0 border border-ink-600 bg-ink-800 text-slate-400">n={p.count}</span>
               </div>
               <div className="mt-1 text-xs text-slate-400">{p.sentence}</div>
             </div>
@@ -103,9 +103,9 @@ function PatternsTab({ data, ai }) {
 
 function Metric({ l, v, small }) {
   return (
-    <div className="rounded-lg border border-ink-700 bg-ink-900 p-2">
-      <div className={small ? 'truncate text-[11px] font-bold text-white' : 'text-lg font-extrabold text-white'}>{v ?? '—'}</div>
-      <div className="text-[10px] font-bold uppercase text-slate-500">{l}</div>
+    <div className="rounded-lg border border-ink-700 bg-ink-900 p-1.5 sm:p-2">
+      <div className={`break-words leading-tight ${small ? 'text-[11px] font-bold text-white' : 'text-lg font-extrabold text-white'}`}>{v ?? '—'}</div>
+      <div className="mt-0.5 text-[9px] font-bold uppercase leading-tight text-slate-500 sm:text-[10px]">{l}</div>
     </div>
   );
 }
@@ -117,26 +117,28 @@ function ActivitiesTab({ data }) {
   return (
     <Card>
       <SectionTitle title={t('Activity Risk Ranking')} sub={t('SIF-precursor density per activity — ranked for intervention targeting')} />
-      <table className="w-full">
-        <thead><tr><th className="th">{t('Rank')}</th><th className="th">{t('Activity')}</th><th className="th">{t('Reports')}</th><th className="th">{t('SIF %')}</th><th className="th">{t('Critical')}</th><th className="th">{t('Density')}</th></tr></thead>
-        <tbody>
-          {rows.map((a, i) => (
-            <tr key={a.activity} className="border-t border-ink-700/60">
-              <td className="td">{i === 0 ? <Dot className="bg-red-500" /> : i === 1 ? <Dot className="bg-orange-500" /> : i === 2 ? <Dot className="bg-amber-400" /> : i + 1}</td>
-              <td className="td font-semibold text-white">{a.activity}</td>
-              <td className="td">{fmt.num(a.reports)}</td>
-              <td className="td">{a.sif_pct}%</td>
-              <td className="td">{fmt.num(a.critical)}</td>
-              <td className="td">
-                <div className="flex items-center gap-2">
-                  <Progress value={a.density * 100} color={a.density > 0.5 ? '#ef4444' : a.density > 0.2 ? '#f59e0b' : '#10b981'} className="w-20" />
-                  <span className="font-mono text-xs font-bold text-white">{a.density.toFixed(2)}</span>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[560px]">
+          <thead><tr><th className="th">{t('Rank')}</th><th className="th">{t('Activity')}</th><th className="th">{t('Reports')}</th><th className="th">{t('SIF %')}</th><th className="th">{t('Critical')}</th><th className="th">{t('Density')}</th></tr></thead>
+          <tbody>
+            {rows.map((a, i) => (
+              <tr key={a.activity} className="border-t border-ink-700/60">
+                <td className="td">{i === 0 ? <Dot className="bg-red-500" /> : i === 1 ? <Dot className="bg-orange-500" /> : i === 2 ? <Dot className="bg-amber-400" /> : i + 1}</td>
+                <td className="td font-semibold text-white">{a.activity}</td>
+                <td className="td">{fmt.num(a.reports)}</td>
+                <td className="td">{a.sif_pct}%</td>
+                <td className="td">{fmt.num(a.critical)}</td>
+                <td className="td">
+                  <div className="flex items-center gap-2">
+                    <Progress value={a.density * 100} color={a.density > 0.5 ? '#ef4444' : a.density > 0.2 ? '#f59e0b' : '#10b981'} className="w-20" />
+                    <span className="font-mono text-xs font-bold text-white">{a.density.toFixed(2)}</span>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </Card>
   );
 }
@@ -148,28 +150,30 @@ function LocationsTab({ data }) {
   return (
     <Card>
       <SectionTitle title={t('Site Risk Ranking')} sub={t('Normalized by report volume — high reporting ≠ poor safety')} />
-      <table className="w-full">
-        <thead><tr><th className="th">{t('Site')}</th><th className="th">{t('Region')}</th><th className="th">{t('State')}</th><th className="th">{t('Field')}</th><th className="th">{t('Reports')}</th><th className="th">{t('SIF')}</th><th className="th">{t('Critical')}</th><th className="th">{t('Density')}</th></tr></thead>
-        <tbody>
-          {rows.map((s) => (
-            <tr key={s.id} className="border-t border-ink-700/60">
-              <td className="td font-semibold text-white">{s.name}</td>
-              <td className="td">{s.region}</td>
-              <td className="td">{s.state}</td>
-              <td className="td text-slate-400">{s.field}</td>
-              <td className="td">{fmt.num(s.reports)}</td>
-              <td className="td">{fmt.num(s.sif)}</td>
-              <td className="td text-red-400">{fmt.num(s.critical)}</td>
-              <td className="td">
-                <div className="flex items-center gap-2">
-                  <Progress value={s.density * 100} color={s.density > 0.5 ? '#ef4444' : s.density > 0.2 ? '#f59e0b' : '#10b981'} className="w-24" />
-                  <span className="font-mono text-xs font-bold text-white">{s.density.toFixed(2)}</span>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[760px]">
+          <thead><tr><th className="th">{t('Site')}</th><th className="th">{t('Region')}</th><th className="th">{t('State')}</th><th className="th">{t('Field')}</th><th className="th">{t('Reports')}</th><th className="th">{t('SIF')}</th><th className="th">{t('Critical')}</th><th className="th">{t('Density')}</th></tr></thead>
+          <tbody>
+            {rows.map((s) => (
+              <tr key={s.id} className="border-t border-ink-700/60">
+                <td className="td font-semibold text-white">{s.name}</td>
+                <td className="td">{s.region}</td>
+                <td className="td">{s.state}</td>
+                <td className="td text-slate-400">{s.field}</td>
+                <td className="td">{fmt.num(s.reports)}</td>
+                <td className="td">{fmt.num(s.sif)}</td>
+                <td className="td text-red-400">{fmt.num(s.critical)}</td>
+                <td className="td">
+                  <div className="flex items-center gap-2">
+                    <Progress value={s.density * 100} color={s.density > 0.5 ? '#ef4444' : s.density > 0.2 ? '#f59e0b' : '#10b981'} className="w-24" />
+                    <span className="font-mono text-xs font-bold text-white">{s.density.toFixed(2)}</span>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </Card>
   );
 }
@@ -197,19 +201,21 @@ function BarriersTab({ data }) {
       </Card>
       <Card>
         <SectionTitle title={t('Barrier detail')} sub={t('Density and SIF-potential share per failing barrier')} />
-        <table className="w-full">
-          <thead><tr><th className="th">{t('Barrier')}</th><th className="th">{t('Count')}</th><th className="th">{t('SIF-pot.')}</th><th className="th">{t('Density')}</th></tr></thead>
-          <tbody>
-            {rows.map((b) => (
-              <tr key={b.barrier} className="border-t border-ink-700/60">
-                <td className="td"><span className="flex items-center gap-1.5 font-semibold text-white"><Icon name="wall" size={13} /> {b.barrier}</span></td>
-                <td className="td">{fmt.num(b.count)}</td>
-                <td className="td">{fmt.num(b.sif)}</td>
-                <td className="td font-mono text-xs text-white">{b.density.toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[480px]">
+            <thead><tr><th className="th">{t('Barrier')}</th><th className="th">{t('Count')}</th><th className="th">{t('SIF-pot.')}</th><th className="th">{t('Density')}</th></tr></thead>
+            <tbody>
+              {rows.map((b) => (
+                <tr key={b.barrier} className="border-t border-ink-700/60">
+                  <td className="td"><span className="flex items-center gap-1.5 font-semibold text-white"><Icon name="wall" size={13} /> {b.barrier}</span></td>
+                  <td className="td">{fmt.num(b.count)}</td>
+                  <td className="td">{fmt.num(b.sif)}</td>
+                  <td className="td font-mono text-xs text-white">{b.density.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Card>
     </div>
   );
@@ -232,9 +238,9 @@ function EmergingTab({ data }) {
 <div className="grid gap-4 sm:grid-cols-2 items-start">
         {patterns.map((p) => (
           <Card key={p.id}>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-white">{p.title}</span>
-              <span className={`chip ${p.trend === 'EMERGING' ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400'}`}>{t(p.trend)}</span>
+            <div className="flex items-center justify-between gap-2">
+              <span className="min-w-0 break-words text-sm font-bold text-white">{p.title}</span>
+              <span className={`chip shrink-0 ${p.trend === 'EMERGING' ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400'}`}>{t(p.trend)}</span>
             </div>
             <p className="mt-1 text-sm text-slate-300">{p.description}</p>
             <div className="mt-2 text-xs text-slate-500">{t('{reports} reports · {sites} sites · {locations}', { reports: p.report_count, sites: p.site_count, locations: p.sites })}</div>

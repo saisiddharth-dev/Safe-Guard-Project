@@ -1,9 +1,11 @@
 // OIL-SIF Intelligence Platform - Node.js Backend (MongoDB)
+try { require('dotenv').config(); } catch (e) { /* dotenv optional */ }
 const express = require('express');
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const { all, get, run, update, updateMany, remove, count, agg, audit, nowISO, clean } = require('./db');
+const { storeMedia, serveLocal, cloudReady } = require('./media');
 const { seed } = require('./seed');
 
 const app = express();
@@ -24,9 +26,8 @@ const PORT = process.env.PORT || 3000;
 const AI_URL = process.env.AI_URL || 'http://127.0.0.1:8050';
 const AUDIO_DIR = path.join(__dirname, '..', 'data', 'audio');
 
-// ---------------------------------------------------------------------------
-// Auth / session store
-// ---------------------------------------------------------------------------
+// Auth / session store --->>>
+
 const sessions = new Map(); // token -> { user, expires }
 
 function hashPw(pw, salt) {
@@ -61,9 +62,9 @@ function requireRole(...roles) {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Role-Based Access Control (RBAC)
-// ---------------------------------------------------------------------------
+
+// Role-Based Access Control (RBAC) ---->>>>
+
 const MODULES = [
   'commandcenter', 'reports', 'alerts', 'copilot', 'ai', 'precursors', 'lsr',
   'riskmap', 'sites', 'contractors', 'investigations', 'capa', 'inspections',
@@ -112,6 +113,12 @@ function escRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function sanitizeMedia(m) {
+  if (!m) return m;
+  const { key, url, kind, mime, name, size, provider, public_id } = m;
+  return { key, url, kind, mime, name, size, provider, public_id };
+}
+
 async function getMap(coll, key = 'id') {
   const rows = await all(coll);
   return rows.reduce((m, r) => { m[r[key]] = r; return m; }, {});
@@ -147,9 +154,8 @@ app.get('/api/me', auth, async (req, res) => {
   res.json({ user: await publicUser(u) });
 });
 
-// ---------------------------------------------------------------------------
-// AI Brain proxy (Python service)
-// ---------------------------------------------------------------------------
+// AI Brain proxy (Python service)--->>>
+
 async function aiCall(path_, payload, timeoutMs = 20000) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -212,9 +218,8 @@ function fallbackAnalyze(text) {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Health
-// ---------------------------------------------------------------------------
+// Health--->>>> 
+
 app.get('/api/health', async (req, res) => {
   let brain = 'offline';
   try { const h = await aiCall('/health', {}); brain = h.status === 'ok' ? h.service : 'error'; } catch (e) { brain = 'offline'; }
@@ -224,9 +229,8 @@ app.get('/api/health', async (req, res) => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Dashboard
-// ---------------------------------------------------------------------------
+// Dashboard --->>>>
+
 app.get('/api/dashboard', auth, async (req, res) => {
   const ids = await scopeSites(req.user); // null => all sites
   const sf = siteFilter(ids);
@@ -438,9 +442,9 @@ app.get('/api/dashboard', auth, async (req, res) => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Reports
-// ---------------------------------------------------------------------------
+
+// Reports---------->>>>>>>>
+
 app.get('/api/reports', auth, async (req, res) => {
   const { activity, barrier, site, lsr, risk, q, type, status, limit = 200 } = req.query;
   const filter = {};
@@ -481,6 +485,7 @@ app.get('/api/reports', auth, async (req, res) => {
     sif_potential: +r.sif_potential,
     quality_flags: JSON.parse(r.quality_flags || '[]'),
     lsr_json: JSON.parse(r.lsr_json || '[]'),
+    attachments: JSON.parse(r.attachments_json || '[]').map(sanitizeMedia),
     sif_confidence: +r.sif_confidence,
   }));
 
@@ -504,12 +509,27 @@ app.get('/api/reports', auth, async (req, res) => {
 });
 
 app.post('/api/reports', auth, async (req, res) => {
-  const { text, type = 'Observation', lang, site_id: reqSite, shift = 'Day', contractor_id, source = 'form', audio_base64, audio_mime, audio_duration } = req.body;
+  const { text, type = 'Observation', lang, site_id: reqSite, shift = 'Day', contractor_id, source = 'form', audio_base64, audio_mime, audio_duration, attachments } = req.body;
   if (!text || !text.trim()) return res.status(400).json({ error: 'text_required' });
 
   const sids = await scopeSites(req.user);
   let site_id = reqSite === undefined || reqSite === null || reqSite === '' ? null : Number(reqSite);
   if (sids !== null && sids.length) site_id = sids.includes(site_id) ? site_id : sids[0];
+
+  // Idempotency via clientReportId (offline queue re-sync):
+  // if the same client already submitted this report, return the existing one
+  // instead of creating a duplicate.
+  const clientReportId = req.body.client_report_id || req.body.clientReportId || null;
+  if (clientReportId) {
+    const existing = await get('reports', { client_report_id: clientReportId });
+    if (existing) {
+      const dupSite = existing.site_id ? await get('sites', { id: existing.site_id }) : null;
+      return res.json({
+        report: { ...clean(existing), site_name: dupSite ? dupSite.name : null, sif_potential: +existing.sif_potential, duplicate: true },
+        review_status: existing.review_status, duplicate: true,
+      });
+    }
+  }
 
   let ai;
   try { ai = await aiCall('/analyze', { text, lang }); }
@@ -535,6 +555,7 @@ app.post('/api/reports', auth, async (req, res) => {
     reason_codes: JSON.stringify(ai.reason_codes || []), explanation_json: JSON.stringify(ai.explanation || []),
     recommended_actions: JSON.stringify(ai.recommended_actions || []), lsr_json: JSON.stringify(ai.lsr || []),
     model: ai.model || 'SIF-v2.4', is_duplicate: 0, created_at: nowISO(),
+    ...(clientReportId ? { client_report_id: clientReportId } : {}),
   })).lastInsertRowid;
 
   if (ai.lsr && ai.lsr.length) {
@@ -546,11 +567,32 @@ app.post('/api/reports', auth, async (req, res) => {
   if (audio_base64) {
     try {
       const ext = (audio_mime || '').includes('mp3') ? 'mp3' : (audio_mime || '').includes('mpeg') ? 'mp3' : 'webm';
-      const fname = `rec-${id}.${ext}`;
+      const rec = await storeMedia({ base64: audio_base64, mime: audio_mime || 'audio/webm', name: `voice-${id}.${ext}`, created_by: req.user.id });
+      const mediaUrl = rec.key ? `/api/media/${rec.key}/file` : rec.url;
+      if (rec.key) await run('media', { ...rec, report_id: id });
       fs.mkdirSync(AUDIO_DIR, { recursive: true });
-      fs.writeFileSync(path.join(AUDIO_DIR, fname), Buffer.from(audio_base64, 'base64'));
-      await update('reports', { id }, { audio_url: fname, audio_mime: audio_mime || 'audio/webm', audio_duration: Number(audio_duration) || 0 });
+      const legacyFname = `rec-${id}.${ext}`;
+      fs.writeFileSync(path.join(AUDIO_DIR, legacyFname), Buffer.from(audio_base64, 'base64'));
+      await update('reports', { id }, { audio_url: mediaUrl, audio_mime: audio_mime || 'audio/webm', audio_duration: Number(audio_duration) || 0 });
     } catch (e) { console.error('audio save failed', e.message); }
+  }
+
+  const storedAttachments = [];
+  if (Array.isArray(attachments) && attachments.length) {
+    const MAX_ATTACHMENTS = 6;
+    for (const att of attachments.slice(0, MAX_ATTACHMENTS)) {
+      if (!att) continue;
+      const { base64, mime, name } = att;
+      if (!base64) continue;
+      try {
+        const rec = await storeMedia({ base64, mime, name, created_by: req.user.id });
+        if (rec.key) await run('media', { ...rec, report_id: id });
+        storedAttachments.push(att.title ? { ...rec, title: att.title } : rec);
+      } catch (e) { console.error('attachment save failed', e.message); }
+    }
+    if (storedAttachments.length) {
+      await update('reports', { id }, { attachments_json: JSON.stringify(storedAttachments) });
+    }
   }
 
   await audit(req.user, 'REPORT_CREATED', 'report', id, text.slice(0, 90) + (audio_base64 ? ' [voice attachment]' : ''));
@@ -572,6 +614,7 @@ app.get('/api/reports/:id', auth, async (req, res) => {
   const actions = (await all('actions', { report_id: r.id }, { sort: { created_at: -1 } })).map(clean);
   res.json({ report: {
     ...clean(r),
+    attachments: JSON.parse(r.attachments_json || '[]').map(sanitizeMedia),
     site_name: site ? site.name : null, region: site ? site.region : null, state: site ? site.state : null,
     lsrs, actions,
   } });
@@ -581,6 +624,10 @@ app.get('/api/reports/:id/audio', auth, async (req, res) => {
   const r = await get('reports', { id: +req.params.id }, { projection: { audio_url: 1, audio_mime: 1, site_id: 1 } });
   if (!r || !r.audio_url) return res.status(404).json({ error: 'no_audio' });
   if (!(await canSeeReport(req.user, r.site_id))) return res.status(403).json({ error: 'forbidden' });
+  // Cloudinary / media-library URL (http...) or /api/media/... proxy untouched.
+  if (/^https?:\/\//i.test(r.audio_url)) return res.redirect(r.audio_url);
+  if (String(r.audio_url).startsWith('/api/media/')) return res.redirect(r.audio_url);
+  // Legacy: file saved in data/audio/
   const fp = path.join(AUDIO_DIR, path.basename(r.audio_url));
   if (!fs.existsSync(fp)) return res.status(404).json({ error: 'no_audio' });
   res.setHeader('Content-Type', r.audio_mime || 'audio/webm');
@@ -588,6 +635,36 @@ app.get('/api/reports/:id/audio', auth, async (req, res) => {
   res.setHeader('Cache-Control', 'private, max-age=3600');
   res.setHeader('Content-Disposition', `inline; filename="${path.basename(r.audio_url)}"`);
   fs.createReadStream(fp).pipe(res);
+});
+
+// Media upload -> Cloudinary first, local disk fallback.
+app.post('/api/media', auth, async (req, res) => {
+  const { base64, mime, name } = req.body || {};
+  if (!base64) return res.status(400).json({ error: 'no_file' });
+  try {
+    const record = await storeMedia({ base64, mime, name, created_by: req.user.id });
+    await run('media', { ...record, report_id: null });
+    await audit(req.user, 'MEDIA_UPLOADED', 'media', record.key || '', `${record.kind} ${Math.ceil(record.size / 1024)}KB via ${record.provider}`);
+    res.json({ media: record });
+  } catch (e) {
+    res.status(400).json({ error: e.message || 'upload_failed' });
+  }
+});
+
+// Media file access — auth via Authorization header OR short-lived ?token= (needed for
+// <img>/<video>/<audio> tags which cannot send custom headers).
+app.get('/api/media/:key/file', async (req, res) => {
+  try {
+    const m = await get('media', { key: req.params.key });
+    if (!m) return res.status(404).json({ error: 'no_file' });
+    if (m.provider === 'cloudinary') {
+      if (m.url) return res.redirect(m.url);
+      return res.status(404).json({ error: 'no_file' });
+    }
+    serveLocal(clean(m), req, res);
+  } catch (e) {
+    res.status(500).json({ error: 'media_error' });
+  }
 });
 
 app.patch('/api/reports/:id', auth, requireRole('Site HSE', 'Regional HSE', 'Corporate HSE', 'Supervisor', 'Administrator'), async (req, res) => {
@@ -642,9 +719,8 @@ app.get('/api/reports/:id/similar', auth, async (req, res) => {
   }
 });
 
-// ---------------------------------------------------------------------------
-// AI endpoints
-// ---------------------------------------------------------------------------
+// AI endpoints----------->>>>>>>
+
 app.post('/api/ai/analyze', auth, async (req, res) => {
   const { text, lang } = req.body;
   if (!text) return res.status(400).json({ error: 'text_required' });
@@ -737,9 +813,8 @@ app.post('/api/copilot', auth, async (req, res) => {
   }
 });
 
-// ---------------------------------------------------------------------------
-// Analytics
-// ---------------------------------------------------------------------------
+// Analytics----------->>>>>>>>>
+
 app.get('/api/analytics/precursors', auth, async (req, res) => {
   const rows = (await all('patterns', {}, { sort: { report_count: -1 } })).map(clean);
   const sc = siteFilter(await scopeSites(req.user));
@@ -883,9 +958,8 @@ app.get('/api/analytics/trends', auth, async (req, res) => {
   res.json({ trend: t, activities, by_shift: byShift, weekday });
 });
 
-// ---------------------------------------------------------------------------
-// Contractors
-// ---------------------------------------------------------------------------
+// Contractors ---------->>>>>
+
 app.get('/api/contractors', auth, async (req, res) => {
   const contractors = await all('contractors', { active: 1 });
   const repRows = await all('reports', {}, { projection: { contractor_id: 1, sif_potential: 1, risk_level: 1 } });
@@ -930,9 +1004,8 @@ app.post('/api/contractors', auth, requireRole('Administrator', 'Corporate HSE',
   res.json({ id });
 });
 
-// ---------------------------------------------------------------------------
-// CAPA
-// ---------------------------------------------------------------------------
+// CAPA------------>>>>>>>>
+
 app.get('/api/actions', auth, async (req, res) => {
   const sids = await scopeSites(req.user);
   const reportMap = await getMap('reports');
@@ -989,9 +1062,8 @@ app.patch('/api/actions/:id', auth, requireRole('Site HSE', 'Regional HSE', 'Cor
   res.json({ ok: true });
 });
 
-// ---------------------------------------------------------------------------
-// Alerts
-// ---------------------------------------------------------------------------
+// Alerts------------>>>>>>>>>>
+
 app.get('/api/alerts', auth, async (req, res) => {
   const rows = (await all('alerts', {}, { sort: { created_at: -1 } })).map(clean);
   res.json({ alerts: rows });
@@ -1002,9 +1074,9 @@ app.post('/api/alerts/:id/ack', auth, async (req, res) => {
   res.json({ ok: true });
 });
 
-// ---------------------------------------------------------------------------
-// Knowledge / Lessons / Investigations / Interventions / Inspections / Courses
-// ---------------------------------------------------------------------------
+
+// Knowledge / Lessons / Investigations / Interventions / Inspections / Courses--------->>>>>>>>>>>
+
 app.get('/api/knowledge', auth, async (req, res) => {
   const q = (req.query.q || '').toLowerCase();
   let rows = await all('knowledge_docs', {}, { sort: { category: 1, title: 1 } });
@@ -1094,9 +1166,9 @@ app.get('/api/courses', auth, async (req, res) => {
   res.json({ courses: (await all('courses', {}, { sort: { created_at: -1 } })).map(clean) });
 });
 
-// ---------------------------------------------------------------------------
-// Sites & assets
-// ---------------------------------------------------------------------------
+
+// Sites & assets------->>>>>>>>>>
+
 app.get('/api/sites', auth, async (req, res) => {
   const rows = (await all('sites', {}, { projection: { id: 1, name: 1, region: 1, state: 1, field: 1, lat: 1, lng: 1 } })).map(clean);
   res.json({ sites: rows });
@@ -1107,9 +1179,9 @@ app.get('/api/assets', auth, async (req, res) => {
   res.json({ assets: rows });
 });
 
-// ---------------------------------------------------------------------------
-// Notifications
-// ---------------------------------------------------------------------------
+
+// Notifications------------>>>>>>>
+
 app.get('/api/notifications', auth, async (req, res) => {
   const rows = (await all('notifications', {}, { sort: { created_at: -1 }, limit: 50 })).map(clean);
   res.json({ notifications: rows });
@@ -1119,9 +1191,9 @@ app.post('/api/notifications/read-all', auth, async (req, res) => {
   res.json({ ok: true });
 });
 
-// ---------------------------------------------------------------------------
-// Admin
-// ---------------------------------------------------------------------------
+
+// Admin---------->>>>>>>>
+
 app.get('/api/admin/audit', auth, requireRole('Administrator', 'Corporate HSE'), requireModule('admin'), async (req, res) => {
   res.json({ audit: (await all('audit_log', {}, { sort: { created_at: -1 }, limit: 300 })).map(clean) });
 });
@@ -1209,17 +1281,17 @@ app.get('/api/data-quality', auth, async (req, res) => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Seed utility route (admin)
-// ---------------------------------------------------------------------------
+
+// Seed utility route (admin)------------>>>>>>>>>
+
 app.post('/api/admin/reseed', auth, requireRole('Administrator'), requireModule('admin'), async (req, res) => {
   const r = await seed();
   res.json({ ok: true, ...r });
 });
 
-// ---------------------------------------------------------------------------
-// Serve frontend (dist from Vite build)
-// ---------------------------------------------------------------------------
+
+// Serve frontend (dist from Vite build)----------->>>>>>>>>
+
 const FRONT = path.join(__dirname, '..', 'frontend');
 const DIST = path.join(FRONT, 'dist');
 app.use(express.static(DIST));

@@ -175,6 +175,7 @@ const WISIM_CSS = `
 
 [data-wisim] .wisim-results {
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
   gap: 12px;
   margin-top: 24px;
@@ -184,7 +185,7 @@ const WISIM_CSS = `
   background: #f8fafc;
 }
 
-[data-wisim] .wisim-stat { flex: 1; min-width: 0; }
+[data-wisim] .wisim-stat { flex: 1 1 120px; min-width: 0; }
 
 [data-wisim] .wisim-stat-label {
   font-size: 10.5px;
@@ -207,7 +208,7 @@ const WISIM_CSS = `
 
 [data-wisim] .wisim-impact {
   align-self: center;
-  flex-shrink: 0;
+  flex: 1 1 140px;
   padding: 12px 16px;
   border-radius: 12px;
   background: #ecfdf5;
@@ -266,6 +267,7 @@ const WISIM_CSS = `
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   font-size: 12.5px;
 }
@@ -277,6 +279,28 @@ const WISIM_CSS = `
   font-size: 11.5px;
   line-height: 1.5;
   color: #94a3b8;
+}
+
+/* ---------- dark theme ---------- */
+html.dark [data-wisim] .wisim-panel { background: #121a2e; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(148, 163, 184, 0.18); }
+html.dark [data-wisim] .wisim-close { background: #1a243b; border-color: #314063; color: #94a3b8; }
+html.dark [data-wisim] .wisim-close:hover { background: #25314d; color: #ffffff; }
+html.dark [data-wisim] .wisim-badge { background: #2e2510; color: #fbbf24; }
+html.dark [data-wisim] .wisim-header h2, html.dark [data-wisim] .wisim-label,
+html.dark [data-wisim] .wisim-program, html.dark [data-wisim] .wisim-proj-row strong { color: #e6edf7; }
+html.dark [data-wisim] .wisim-program { background-color: #1a243b; border-color: #314063; }
+html.dark [data-wisim] .wisim-proj-row span { color: #8fa1b8; }
+html.dark [data-wisim] .wisim-pct { color: #60a5fa; }
+
+/* ---------- small screens ---------- */
+@media (max-width: 480px) {
+  [data-wisim] .wisim-modal { padding: 12px; }
+  [data-wisim] .wisim-panel { padding: 22px 18px 18px; }
+  [data-wisim] .wisim-results { flex-direction: column; align-items: stretch; }
+  [data-wisim] .wisim-arrow { align-self: center; transform: rotate(90deg); }
+  [data-wisim] .wisim-impact { width: 100%; }
+  [data-wisim] .wisim-header h2 { font-size: 18px; }
+  [data-wisim] .wisim-stat-value { font-size: 24px; }
 }
 `;
 

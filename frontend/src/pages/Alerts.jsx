@@ -15,7 +15,7 @@ export default function AlertsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold text-white"><Icon name="bell" size={22} /> {t('Alert Center')}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-extrabold text-white sm:text-2xl"><Icon name="bell" size={20} className="shrink-0" /> <span className="min-w-0 break-words">{t('Alert Center')}</span></h1>
         <p className="text-sm text-slate-500">{t('Intelligent escalation — no one watches a dashboard 24×7')}</p>
       </div>
 
@@ -41,7 +41,7 @@ export default function AlertsPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-bold text-white">{a.title}</span>
+                  <span className="min-w-0 break-words font-bold text-white">{a.title}</span>
                   <StatusBadge status={a.status} />
                   <span className="chip border border-ink-600 bg-ink-800 text-slate-400">{a.severity}</span>
                   <span className="mono ml-auto text-slate-500">{fmt.ago(a.created_at)}</span>
@@ -54,7 +54,7 @@ export default function AlertsPage() {
                   </div>
                 )}
                 {a.status === 'active' && (
-                  <button className="btn-primary mt-2 !px-2.5 !py-1 text-[11px]" onClick={() => ack(a.id)}><Check size={12} /> {t('Acknowledge')}</button>
+                  <button className="btn-primary mt-2 w-full !px-3.5 text-xs sm:w-auto sm:!px-2.5 sm:text-[11px]" onClick={() => ack(a.id)}><Check size={12} /> {t('Acknowledge')}</button>
                 )}
               </div>
             </div>

@@ -155,7 +155,9 @@ T(['कामगार बिना परमिट के हॉट वर्�
 // Sites, contractors, assets, users
 // ---------------------------------------------------------------------------
 const SITES = [
-  { name: 'Duliajan', region: 'Assam', state: 'Assam', field: 'Bholaguri', lat: 27.36, lng: 95.31 },
+  { 
+    name: 'Duliajan', 
+    region: 'Assam', state: 'Assam', field: 'Bholaguri', lat: 27.36, lng: 95.31 },
   { name: 'Nazira', region: 'Assam', state: 'Assam', field: 'Dikom', lat: 26.91, lng: 94.74 },
   { name: 'Sivasagar', region: 'Assam', state: 'Assam', field: 'Lakwa', lat: 26.98, lng: 94.63 },
   { name: 'Jorhat', region: 'Assam', state: 'Assam', field: 'Moran', lat: 26.75, lng: 94.21 },
