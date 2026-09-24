@@ -20,9 +20,9 @@ export default function Inspections() {
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {rows.map((i) => (
           <Card key={i.id} className="cursor-pointer transition-colors hover:border-brand" onClick={() => setView(i)}>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-white">{i.title}</span>
-              <StatusBadge status={i.status} />
+            <div className="flex items-start justify-between gap-2">
+              <span className="min-w-0 break-words text-sm font-bold text-white">{i.title}</span>
+              <span className="shrink-0"><StatusBadge status={i.status} /></span>
             </div>
             <div className="mt-1 flex items-center gap-1 text-[11px] text-slate-500"><Icon name="pin" size={12} /> {i.site_name} · {fmt.date(i.date || i.created_at)}</div>
             <div className="mt-3 flex flex-wrap gap-1.5">

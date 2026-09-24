@@ -59,7 +59,7 @@ export default function CAPA() {
 
       <Card>
         <SectionTitle title={filter ? t('Actions — {filter}', { filter: t(filter) }) : t('All actions')} sub={t('{n} shown', { n: actions.length })} />
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto lg:block">
           <table className="w-full min-w-[860px]">
             <thead><tr>
               <th className="th">#</th><th className="th">{t('Action')}</th><th className="th">{t('Report')}</th><th className="th">{t('Site')}</th>
@@ -71,6 +71,11 @@ export default function CAPA() {
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="space-y-3 lg:hidden">
+          {actions.map((a) => (
+            <ActionCard key={a.id} a={a} setStatus={setStatus} updating={updating} assignee={assignee} setAssignee={setAssignee} />
+          ))}
         </div>
         {!actions.length && <Empty />}
       </Card>
@@ -104,6 +109,40 @@ function ActionRow({ a, setStatus, updating, assignee, setAssignee }) {
           )}
         </td>
       </tr>
+      {open && <ActionModal a={a} onClose={() => setOpen(false)} setStatus={setStatus} assignee={assignee} setAssignee={setAssignee} />}
+    </>
+  );
+}
+
+function ActionCard({ a, setStatus, updating, assignee, setAssignee }) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const next = a.status === 'Open' ? 'Assigned' : a.status === 'Assigned' ? 'In Progress' : a.status === 'In Progress' ? 'Pending Verification' : a.status === 'Pending Verification' ? 'Closed' : null;
+  return (
+    <>
+      <div className="rounded-xl border border-ink-700 bg-ink-850/80 p-3 shadow-sm">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <button className="text-left text-sm font-bold text-white hover:text-brand" onClick={() => setOpen(true)}>{a.title}</button>
+            <div className="mt-0.5 text-[11px] text-slate-500">{a.assignee || t('Unassigned')}{a.site_name ? ` · ${a.site_name}` : ''}</div>
+          </div>
+          <span className="shrink-0 font-mono text-[11px] text-slate-500">#{a.id}</span>
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          <PriorityBadge p={a.priority} />
+          <StatusBadge status={a.status} />
+          <span className="chip border border-ink-600 bg-ink-800 text-slate-400">{a.report_no || '—'}</span>
+          {a.overdue && <span className="chip bg-red-500/15 text-red-400">{t('!! OVERDUE')}</span>}
+        </div>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-ink-700/60 pt-2.5">
+          <span className="text-[11px] text-slate-500">{t('Due')}: {fmt.date(a.due_date)}</span>
+          {next ? (
+            <button className="btn-primary !px-3.5 text-xs" disabled={updating} onClick={() => setStatus(a, next)}><Icon name="arrow" size={12} className="mr-1 inline" />{t(next)}</button>
+          ) : (
+            <button className="btn-ghost !px-3.5 text-xs" disabled={updating} onClick={() => setStatus(a, 'Reopened')}><Icon name="undo" size={12} className="mr-1 inline" />{t('Reopen')}</button>
+          )}
+        </div>
+      </div>
       {open && <ActionModal a={a} onClose={() => setOpen(false)} setStatus={setStatus} assignee={assignee} setAssignee={setAssignee} />}
     </>
   );
