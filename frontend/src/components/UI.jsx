@@ -102,7 +102,7 @@ export function Stat({ label, value, sub, delta, danger, ok, icon, accent, spark
                   <stop offset="100%" stopColor={color} stopOpacity={0.02} />
                 </linearGradient>
               </defs>
-              <Area type="monotone" dataKey="v" stroke={color} strokeWidth={1.75} fill={`url(#${gid})`} dot={false} />
+              <Area type="monotone" dataKey="v" stroke={color} strokeWidth={4.5} fill={`url(#${gid})`} dot={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

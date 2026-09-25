@@ -114,7 +114,7 @@ export default function ReportSifTrendChart({
                 dataKey={s.key}
                 name={labels[s.key]}
                 stroke={s.stroke}
-                strokeWidth={2}
+                strokeWidth={3.5}
                 strokeLinecap="round"
                 fill={`url(#${uid}${s.key})`}
                 dot={false}

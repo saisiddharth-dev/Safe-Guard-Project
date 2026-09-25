@@ -224,8 +224,8 @@ export default function CommandCenter() {
               <YAxis tick={AX_TICK} stroke={AX_STROKE} />
               <Tooltip contentStyle={TT_STYLE} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Line type="monotone" dataKey="reports" name={t('Reports')} stroke="#2f7cf6" strokeWidth={2} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="sif" name={t('SIF-potential')} stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="reports" name={t('Reports')} stroke="#2f7cf6" strokeWidth={5.5} dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="sif" name={t('SIF-potential')} stroke="#f59e0b" strokeWidth={5.5} dot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -373,8 +373,8 @@ export default function CommandCenter() {
                   formatter={(value, name) => [typeof value === 'number' ? (name.includes('density') || name.includes('%') ? `${value}%` : value.toLocaleString('en-US')) : value, name]}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Area yAxisId="l" type="linear" dataKey="reports" name={t('Reports')} stroke="#2f7cf6" fill="url(#wkFill)" strokeWidth={2} />
-                <Line yAxisId="r" type="linear" dataKey="density_pct" name={t('SIF density')} stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+                <Area yAxisId="l" type="linear" dataKey="reports" name={t('Reports')} stroke="#2f7cf6" fill="url(#wkFill)" strokeWidth={5.5} />
+                <Line yAxisId="r" type="linear" dataKey="density_pct" name={t('SIF density')} stroke="#f59e0b" strokeWidth={5.5} dot={{ r: 4 }} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
