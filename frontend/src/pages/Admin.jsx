@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api';
-import { Card, Spinner, Empty, SectionTitle, Progress, fmt, useFetch, Icon, Modal } from '../components/UI';
+import { Card, Spinner, Empty, SectionTitle, Progress, fmt, useFetch, Icon, Modal, TabBar } from '../components/UI';
 import { useAuth } from '../AuthContext';
 import { Check, X as XIcon, ChevronDown, ChevronRight, RotateCcw, Plus } from 'lucide-react';
 import { useI18n } from '../i18n';
@@ -51,11 +51,13 @@ export default function Admin() {
         <p className="text-sm text-slate-500">{t('Access Control · data quality · audit trail · model governance · users')}</p>
       </div>
 
-      <div className="flex gap-1 rounded-lg border border-ink-700 bg-ink-900 p-1 w-fit overflow-x-auto">
-        {[['access', t('Access Control')], ['users', t('Users & Roles')], ['data', t('Data Quality')], ['audit', t('Audit Trail')], ['models', t('AI Models')]].map(([id, l]) => (
-          <button key={id} onClick={() => setTab(id)} className={`min-h-[44px] whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold sm:min-h-0 ${tab === id ? 'bg-brand text-white' : 'text-slate-400'}`}>{l}</button>
-        ))}
-      </div>
+      <TabBar
+        tabs={[['access', t('Access Control')], ['users', t('Users & Roles')], ['data', t('Data Quality')], ['audit', t('Audit Trail')], ['models', t('AI Models')]].map(([id, l]) => ({ id, label: l }))}
+        active={tab}
+        onChange={setTab}
+        idleClassName="text-slate-400"
+        containerClassName="w-full rounded-lg border border-ink-700 bg-ink-900 p-1"
+      />
 
       {tab === 'access' && <AccessControl data={users} />}
       {tab === 'users' && <Users data={users} sites={sites} />}

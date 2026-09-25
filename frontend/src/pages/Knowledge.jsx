@@ -48,7 +48,7 @@ export default function Knowledge() {
               <span className="text-sm font-bold text-white">{d.title}</span>
             </div>
             <div className="mt-1.5 text-[11px] text-slate-500">{d.category}</div>
-            <p className="mt-2 line-clamp-3 text-xs text-slate-400">{d.content}</p>
+            <p className="mt-2 clamp-3 text-xs text-slate-400">{d.content}</p>
             <div className="mt-2 flex flex-wrap gap-1">
               {(d.tags || []).map((t, i) => <span key={i} className="chip bg-brand/10 text-brand">{t}</span>)}
             </div>
