@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api';
-import { Card, Spinner, Empty, SectionTitle, Progress, fmt, useFetch, Icon, Modal } from '../components/UI';
+import { Card, Spinner, Empty, SectionTitle, Progress, fmt, useFetch, Icon, Modal, TabBar } from '../components/UI';
 import { useAuth } from '../AuthContext';
 import { Check, X as XIcon, ChevronDown, ChevronRight, RotateCcw, Plus } from 'lucide-react';
 import { useI18n } from '../i18n';
@@ -51,11 +51,13 @@ export default function Admin() {
         <p className="text-sm text-slate-500">{t('Access Control · data quality · audit trail · model governance · users')}</p>
       </div>
 
-      <div className="flex gap-1 rounded-lg border border-ink-700 bg-ink-900 p-1 w-fit overflow-x-auto">
-        {[['access', t('Access Control')], ['users', t('Users & Roles')], ['data', t('Data Quality')], ['audit', t('Audit Trail')], ['models', t('AI Models')]].map(([id, l]) => (
-          <button key={id} onClick={() => setTab(id)} className={`min-h-[44px] whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold sm:min-h-0 ${tab === id ? 'bg-brand text-white' : 'text-slate-400'}`}>{l}</button>
-        ))}
-      </div>
+      <TabBar
+        tabs={[['access', t('Access Control')], ['users', t('Users & Roles')], ['data', t('Data Quality')], ['audit', t('Audit Trail')], ['models', t('AI Models')]].map(([id, l]) => ({ id, label: l }))}
+        active={tab}
+        onChange={setTab}
+        idleClassName="text-slate-400"
+        containerClassName="w-full rounded-lg border border-ink-700 bg-ink-900 p-1"
+      />
 
       {tab === 'access' && <AccessControl data={users} />}
       {tab === 'users' && <Users data={users} sites={sites} />}
@@ -241,8 +243,8 @@ function Users({ data, sites }) {
         </div>
         <button className="btn-primary !px-3 !py-1.5 text-xs" onClick={() => setAdding(true)}><Plus size={14} /> {t('Add User')}</button>
       </div>
-      <div className="max-h-[560px] overflow-y-auto">
-        <table className="w-full">
+      <div className="max-h-[560px] overflow-auto">
+        <table className="w-full min-w-[760px]">
           <thead><tr><th className="th">{t('Username')}</th><th className="th">{t('Name')}</th><th className="th">{t('Role')}</th><th className="th">{t('Site')}</th><th className="th">{t('Modules')}</th><th className="th">{t('Email')}</th></tr></thead>
           <tbody>
             {users.map((u) => (
@@ -367,8 +369,8 @@ function Audit({ data }) {
   return (
     <Card>
       <SectionTitle title={t('Full audit trail')} sub={t('Nothing silently disappears — every decision is traceable')} />
-      <div className="max-h-[560px] overflow-y-auto">
-        <table className="w-full">
+      <div className="max-h-[560px] overflow-auto">
+        <table className="w-full min-w-[620px]">
           <thead><tr><th className="th">{t('Action')}</th><th className="th">{t('Entity')}</th><th className="th">{t('User')}</th><th className="th">{t('Detail')}</th><th className="th">{t('Time')}</th></tr></thead>
           <tbody>
             {rows.map((a) => (
@@ -403,8 +405,8 @@ function Models({ data }) {
           const mm = (() => { try { return JSON.parse(m.metrics || '{}'); } catch { return {}; } })();
           return (
             <div key={m.id} className={`mb-3 rounded-lg border p-4 ${m.active ? 'border-emerald-500/30' : 'border-ink-700'}`}>
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-white">{m.name}</span>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="min-w-0 break-words font-bold text-white">{m.name}</span>
                 {m.active ? <span className="chip bg-emerald-500/15 text-emerald-400">● {t('Active')}</span> : <span className="chip bg-slate-500/15 text-slate-400">{t('Inactive')}</span>}
               </div>
               <div className="mt-2 grid grid-cols-3 gap-2 text-center">
@@ -421,8 +423,8 @@ function Models({ data }) {
       </Card>
       <Card>
         <SectionTitle title={t('Retraining signals')} sub={t('Human corrections = future training data')} />
-        <div className="max-h-[420px] overflow-y-auto">
-          <table className="w-full">
+        <div className="max-h-[420px] overflow-auto">
+          <table className="w-full min-w-[480px]">
             <thead><tr><th className="th">{t('Report')}</th><th className="th">{t('Field')}</th><th className="th">{t('AI → Human')}</th></tr></thead>
             <tbody>
               {feedback.map((f) => (

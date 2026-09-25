@@ -106,7 +106,7 @@ html.dark .srt { --srt-bg:#121A2E; --srt-header:#16203A; --srt-border:#25314D; -
 .srt .srt-row.srt-active:hover .srt-td { background:#DFEBFF; }
 .srt .srt-row:hover .srt-td-id { background:var(--srt-hover); }
 .srt .srt-desc { overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
-  line-height:1.4; font-size:13px; color:var(--srt-text); cursor:default; }
+  text-overflow:ellipsis; line-height:1.4; font-size:13px; color:var(--srt-text); cursor:default; }
 .srt .srt-id { font-family:'JetBrains Mono', ui-monospace, monospace; font-size:11.5px; font-weight:600; color:var(--srt-muted); white-space:nowrap; }
 .srt .srt-sorthint { display:inline-flex; opacity:.45; color:#94A3B8; }
 .srt .srt-th[data-sort] .srt-sorthint { opacity:1; color:var(--srt-accent); }
@@ -238,7 +238,7 @@ html.dark .srt { --srt-bg:#121A2E; --srt-header:#16203A; --srt-border:#25314D; -
 .srt .srt-card-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem; margin-top:.625rem; }
 .srt .srt-card-meta .srt-chip { justify-content:flex-start; }
 .srt .srt-card-desc { margin-top:.5rem; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
-  line-height:1.45; font-size:13px; color:var(--srt-text); }
+  text-overflow:ellipsis; line-height:1.45; font-size:13px; color:var(--srt-text); }
 .srt .srt-card-foot { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.5rem; margin-top:.75rem;
   padding-top:.625rem; border-top:1px dashed var(--srt-border); font-size:12px; color:var(--srt-muted); }
 

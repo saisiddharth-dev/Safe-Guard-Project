@@ -5,7 +5,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
 import Tesseract from 'tesseract.js';
 import { api, fmt, riskColor, statusColor, ALL_LSRS, LSR_META } from '../api';
-import { Card, RiskBadge, StatusBadge, Modal, Progress, Empty, Spinner, SectionTitle, Icon } from '../components/UI';
+import { Card, RiskBadge, StatusBadge, Modal, Progress, Empty, Spinner, SectionTitle, Icon, TabBar as ScrollTabBar } from '../components/UI';
 import { enqueue, syncNow, retryQueued, useQueueState, genClientReportId } from '../queue/offlineQueue';
 import SafetyReportsTable from '../components/SafetyReportsTable';
 import { useAuth } from '../AuthContext';
@@ -171,14 +171,13 @@ function TabBar({ tab, setTab }) {
     { id: 'all', label: t('All Reports') }, { id: 'review', label: t('AI Review Queue') }, { id: 'mine', label: t('My Reports') },
   ];
   return (
-    <div className="no-scrollbar flex gap-1 overflow-x-auto rounded-lg border border-ink-700 bg-ink-900 p-1 sm:flex-wrap sm:overflow-visible">
-      {tabs.map((t) => (
-        <button key={t.id} onClick={() => setTab(t.id)}
-          className={`min-h-[44px] shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold sm:min-h-0 ${tab === t.id ? 'bg-brand text-white' : 'text-slate-400 hover:text-slate-200'}`}>
-          {t.label}
-        </button>
-      ))}
-    </div>
+    <ScrollTabBar
+      tabs={tabs}
+      active={tab}
+      onChange={setTab}
+      wrapOnSm
+      containerClassName="rounded-lg border border-ink-700 bg-ink-900 p-1"
+    />
   );
 }
 
@@ -758,14 +757,13 @@ function ReportDetail({ report, onClose, onSaved }) {
         <span className="chip border border-ink-600 bg-ink-800 text-slate-300">{r.site_name || r.site || t('Unknown site')} · {r.shift}</span>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-ink-700 bg-ink-900 p-1">
-        <div className="flex w-max gap-1">
-          {['overview', 'ai', 'review', 'actions', 'similar'].map((k) => (
-            <button key={k} onClick={() => setTab(k)}
-              className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold ${tab === k ? 'bg-brand text-white' : 'text-slate-400'}`}>{tabLabel[k]}</button>
-          ))}
-        </div>
-      </div>
+      <ScrollTabBar
+        tabs={['overview', 'ai', 'review', 'actions', 'similar'].map((k) => ({ id: k, label: tabLabel[k] }))}
+        active={tab}
+        onChange={setTab}
+        idleClassName="text-slate-400"
+        containerClassName="rounded-lg border border-ink-700 bg-ink-900 p-1"
+      />
 
       <div className="mt-4">
         {tab === 'overview' && (
