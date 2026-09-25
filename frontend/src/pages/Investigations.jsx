@@ -32,7 +32,7 @@ export default function Investigations() {
               <span className="text-sm font-bold text-white">{i.title}</span>
               <StatusBadge status={i.status} />
             </div>
-            <p className="mt-2 line-clamp-2 text-xs text-slate-400">{i.summary || i.text_original}</p>
+            <p className="mt-2 clamp-2 text-xs text-slate-400">{i.summary || i.text_original}</p>
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
               <span className="font-mono">{i.report_no}</span>
               <span>{fmt.ago(i.created_at)}</span>
@@ -85,11 +85,11 @@ function InvestigationDetail({ inv, onClose, onUpdate }) {
 
         <div>
           <div className="label">{t('Cause analysis stack')}</div>
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-1.5">
             <StackItem label={t('Immediate')} value={inv.immediate_cause} />
-            <Arrow />
+            <Arrow className="hidden sm:inline-flex" />
             <StackItem label={t('Contributing')} value={contributing.join(', ')} />
-            <Arrow />
+            <Arrow className="hidden sm:inline-flex" />
             <StackItem label={t('Root cause')} value={inv.root_cause} accent />
           </div>
         </div>
@@ -130,13 +130,13 @@ function InvestigationDetail({ inv, onClose, onUpdate }) {
 function StackItem({ label, value, accent }) {
   if (!value) return null;
   return (
-    <div className={`rounded-lg border p-2.5 ${accent ? 'border-red-500/40 bg-red-500/10' : 'border-ink-700 bg-ink-900'}`}>
+    <div className={`min-w-0 flex-1 rounded-lg border p-2.5 sm:max-w-[260px] ${accent ? 'border-red-500/40 bg-red-500/10' : 'border-ink-700 bg-ink-900'}`}>
       <div className="text-[9px] font-bold uppercase text-slate-500">{label}</div>
-      <div className="max-w-[180px] truncate text-xs text-slate-200">{value}</div>
+      <div className="clamp-3 text-xs text-slate-200">{value}</div>
     </div>
   );
 }
-function Arrow() { return <span className="text-slate-600"><Icon name="arrow" size={14} /></span>; }
+function Arrow({ className = '' }) { return <span className={`text-slate-600 ${className}`}><Icon name="arrow" size={14} /></span>; }
 
 function NewInvestigation({ onClose, onCreated }) {
   const { t } = useI18n();

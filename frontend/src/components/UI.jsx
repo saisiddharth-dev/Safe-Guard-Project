@@ -1,4 +1,4 @@
-import { useState, useEffect, useId } from 'react';
+import { useState, useEffect, useId, useRef } from 'react';
 import { Area, AreaChart, ResponsiveContainer } from 'recharts';
 import {
   ArrowRight, Ban, BarChart3, Bell, Bolt, Bomb, BookOpen, Bot, Box, BrickWall,
@@ -131,11 +131,28 @@ export function Progress({ value, color = '#2f7cf6', className = '' }) {
 }
 
 export function Modal({ open, onClose, title, children, wide }) {
+  // Lock background scroll while a modal is open so the page behind can't
+  // scroll and bleed through the backdrop/sheet. Restored on close/unmount.
+  useEffect(() => {
+    if (!open) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-3 sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:items-center sm:p-4" onClick={onClose}>
       <div
-        className={`card max-h-[88vh] w-full ${wide ? 'max-w-4xl' : 'max-w-xl'} overflow-y-auto fade-up`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className={`card h-dvh w-full overflow-y-auto fade-up rounded-b-none rounded-t-2xl pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:h-auto sm:max-h-[88vh] sm:rounded-xl sm:p-4 ${wide ? 'sm:max-w-4xl' : 'sm:max-w-xl'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-ink-700 px-4 pb-3 pt-4 sm:px-5">
@@ -150,18 +167,105 @@ export function Modal({ open, onClose, title, children, wide }) {
 
 export function Tabs({ tabs, active, onChange }) {
   return (
-    <div className="no-scrollbar flex gap-1 overflow-x-auto rounded-lg border border-ink-700 bg-ink-900 p-1 sm:flex-wrap sm:overflow-visible">
-      {tabs.map((t) => (
-        <button
-          key={t.id}
-          onClick={() => onChange(t.id)}
-          className={`shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold transition-colors min-h-[44px] sm:min-h-0 ${
-            active === t.id ? 'bg-brand text-white' : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          {t.label}
-        </button>
-      ))}
+    <TabBar
+      tabs={tabs}
+      active={active}
+      onChange={onChange}
+      wrapOnSm
+      containerClassName="rounded-lg border border-ink-700 bg-ink-900 p-1"
+    />
+  );
+}
+
+/* Horizontally scrollable tab/chip bar with hidden native scrollbar, edge-fade
+   affordance and automatic active-tab reveal. Kept generic so every tab bar in
+   the app reuses the same scroll UX. */
+function revealInView(el) {
+  if (!el) return;
+  const row = el.closest('.tab-scroll');
+  if (!row) return;
+  const pad = 10;
+  const max = row.scrollWidth - row.clientWidth;
+  if (max <= 0) return;
+  const tl = el.offsetLeft;
+  const tr = tl + el.offsetWidth;
+  const sl = row.scrollLeft;
+  const sr = sl + row.clientWidth;
+  if (tl < sl + pad) {
+    row.scrollTo({ left: Math.max(0, Math.min(tl - pad, max)), behavior: 'smooth' });
+  } else if (tr > sr - pad) {
+    row.scrollTo({ left: Math.max(0, Math.min(tr - row.clientWidth + pad, max)), behavior: 'smooth' });
+  }
+}
+
+function useScrollEdges(ref) {
+  const [edges, setEdges] = useState({ left: false, right: false });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const update = () => {
+      const max = el.scrollWidth - el.clientWidth;
+      setEdges({
+        left: el.scrollLeft > 2,
+        right: max > 0 && el.scrollLeft < max - 2,
+      });
+    };
+    update();
+    let ro = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(update);
+      ro.observe(el);
+    }
+    el.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      el.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+      if (ro) ro.disconnect();
+    };
+  }, [ref]);
+  return edges;
+}
+
+export function TabBar({
+  tabs,
+  active,
+  onChange,
+  containerClassName = '',
+  navClass = 'min-h-[44px] sm:min-h-0 shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold transition-colors',
+  activeClassName = 'bg-brand text-white',
+  idleClassName = 'text-slate-400 hover:text-slate-200',
+  wrapOnSm = false,
+}) {
+  const scrollRef = useRef(null);
+  const activeRef = useRef(null);
+  const { left, right } = useScrollEdges(scrollRef);
+
+  useEffect(() => {
+    // Defer so font/measure pass settles, then reveal the active tab.
+    const t = setTimeout(() => revealInView(activeRef.current), 50);
+    return () => clearTimeout(t);
+  }, [active, tabs]);
+
+  return (
+    <div className="relative">
+      <div
+        ref={scrollRef}
+        className={`tab-scroll gap-1 ${wrapOnSm ? 'sm:flex-wrap sm:overflow-visible' : ''} ${containerClassName}`}
+      >
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            ref={active === t.id ? activeRef : undefined}
+            onClick={() => onChange(t.id)}
+            className={`${navClass} ${active === t.id ? activeClassName : idleClassName}`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {left && <span aria-hidden="true" className="tab-scroll-fade tab-scroll-fade-left" />}
+      {right && <span aria-hidden="true" className="tab-scroll-fade tab-scroll-fade-right" />}
     </div>
   );
 }

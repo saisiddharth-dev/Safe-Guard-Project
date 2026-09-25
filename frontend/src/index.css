@@ -85,6 +85,45 @@ html.dark {
     ::-webkit-scrollbar { width: 5px; height: 5px; }
   }
 }
+/* Mobile touch widths: the browser's overlay scrollbar thumb (grey pill that
+   floats over content and follows the drag position) overlaps card titles/text
+   and section headers — reported on the Command Center, Investigations and CAPA
+   pages. Hide scrollbars on phones app-wide (including the internal `main`
+   scroller and any root scroller); native swipe scrolling is untouched. Desktop
+   keeps its docked, styled scrollbars (>767.98px). */
+@media (max-width: 767.98px) {
+  html, body, main, .navy-shell nav, .card,
+  .overflow-auto, .overflow-y-auto, .overflow-x-auto, .overflow-x-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar,
+  html::-webkit-scrollbar, body::-webkit-scrollbar, main::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
+  *::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-thumb,
+  *::-webkit-scrollbar-thumb:hover,
+  html::-webkit-scrollbar-track, html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-track, body::-webkit-scrollbar-thumb {
+    background: transparent !important;
+  }
+}
+/* N-line text clamp that ALWAYS renders a visible "…" instead of a hard
+   mid-word cut. Replaces bare `line-clamp-*` / fixed-height overflow-hidden. */
+.clamp-1, .clamp-2, .clamp-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.clamp-1 { -webkit-line-clamp: 1; }
+.clamp-2 { -webkit-line-clamp: 2; }
+.clamp-3 { -webkit-line-clamp: 3; }
+/* Full-viewport height with dvh + vh fallback for modal sheets. */
+.h-dvh { height: 100vh; height: 100dvh; }
 
 @layer components {
   .card {
@@ -98,6 +137,38 @@ html.dark {
   }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
+  /* Horizontally scrollable tab/chip rows: hide native scrollbars (no floating
+     grey thumb over content) while keeping smooth touch swiping + snap. */
+  .tab-scroll {
+    position: relative;
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+  }
+  .tab-scroll::-webkit-scrollbar { display: none; }
+  /* Edge fade overlays hinting more content is scrollable. Non-interactive;
+     gradient ends in the container's own bg (ink-900) so it blends seamlessly. */
+  .tab-scroll-fade {
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    width: 44px;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .tab-scroll-fade-left {
+    left: 1px;
+    border-radius: 8px 0 0 8px;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0), rgb(var(--ink-900)));
+  }
+  .tab-scroll-fade-right {
+    right: 1px;
+    border-radius: 0 8px 8px 0;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0), rgb(var(--ink-900)));
+  }
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
   }
